@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - id: download tourism vocabulary
+      - id: download-tourism-vocabulary
         if: ${{ inputs.vocabulary_name != 'transport' }}
         uses: robinraju/release-downloader@v1.8
         with:
@@ -25,7 +25,7 @@ jobs:
           tarBall: false
           zipBall: false
           extract: false
-      - id: download transport vocabulary
+      - id: download-transport-vocabulary
         if: ${{ inputs.vocabulary_name != 'transport' }}
         uses: robinraju/release-downloader@v1.8
         with:
