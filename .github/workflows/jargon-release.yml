@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - run: 'echo "vocabulary_name: ${{ inputs.vocabulary_name }}"'
+
       - id: download-tourism-vocabulary
         if: ${{ inputs.vocabulary_name != 'tourism' }}
         uses: robinraju/release-downloader@v1.8
