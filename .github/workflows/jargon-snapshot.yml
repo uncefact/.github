@@ -5,6 +5,7 @@ on:
     inputs:
       vocabulary_name:
         description: 'Vocabulary name'
+        type: string
         required: true
 
 jobs:
