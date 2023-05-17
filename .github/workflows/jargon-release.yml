@@ -33,7 +33,7 @@ jobs:
         with:
           repository: "uncefact/vocab-transport"
           latest: true
-          fileName: "tourism.jsonld"
+          fileName: "transport.jsonld"
           out-file-path: "vocab"
           tarBall: false
           zipBall: false
