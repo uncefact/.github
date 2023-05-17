@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - id: download-tourism-vocabulary
-        if: ${{ inputs.vocabulary_name != 'transport' }}
+        if: ${{ inputs.vocabulary_name != 'tourism' }}
         uses: robinraju/release-downloader@v1.8
         with:
           repository: "uncefact/vocab-tourism"
