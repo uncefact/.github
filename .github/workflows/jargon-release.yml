@@ -39,7 +39,6 @@ jobs:
           zipBall: false
           extract: false
       - id: download-merge-utility
-        if: ${{ inputs.vocabulary_name != 'transport' }}
         uses: robinraju/release-downloader@v1.8
         with:
           repository: "uncefact/utilities"
