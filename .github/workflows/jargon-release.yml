@@ -116,10 +116,10 @@ jobs:
           artifacts: 'vocab/${{ inputs.vocabulary_name }}.jsonld,vocab/merged.jsonld'
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  preview-pages:
-    needs:
-      - release_tag
-    uses: uncefact/vocabulary-outputs/.github/workflows/preview.yml@jargon-pages
-    with:
-      vocabulary_name: ${{ inputs.vocabulary_name }}
-    secrets: inherit
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: uncefact/vocabulary-outputs
+          event-type: update-vocabulary
+          client-payload: '{"vocabulary_name": "${{ inputs.vocabulary_name }}", "release": {"version": "${{ github.event.client_payload.release.version }}"}}'
