@@ -116,9 +116,8 @@ jobs:
           artifacts: 'vocab/${{ inputs.vocabulary_name }}.jsonld'
           token: ${{ secrets.GITHUB_TOKEN }}
 
-#      - name: Repository Dispatch
-#        uses: peter-evans/repository-dispatch@v2
-#        with:
-#          token: ${{ secrets.PAT_TOKEN }}
-#          repository: uncefact/vocabulary-outputs
-#          event-type: update-${{ inputs.vocabulary_name }}
+      - name: website update
+        uses: uncefact/vocabulary-outputs/.github/workflows/preview.yml@jargon-pages
+        with:
+          vocabulary_name: ${{ inputs.vocabulary_name }}
+        secrets: inherit
