@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: 'echo "vocabulary_name: ${{ inputs.vocabulary_name }}"'
 
       - id: download-tourism-vocabulary
@@ -47,7 +47,7 @@ jobs:
           tarBall: false
           zipBall: false
           extract: false
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v3
         with:
           distribution: 'adopt'
           java-version: '11'
