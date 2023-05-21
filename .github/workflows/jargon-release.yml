@@ -119,17 +119,7 @@ jobs:
   pages_preview:
     needs:
       - release_tag
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          repository: uncefact/vocabulary-outputs
-          ref: jargon-pages
-
-      - name: website update
-        uses: uncefact/vocabulary-outputs/.github/workflows/preview.yml@jargon-pages
-        with:
-          vocabulary_name: ${{ inputs.vocabulary_name }}
-        secrets: inherit
+    uses: uncefact/vocabulary-outputs/.github/workflows/preview.yml@jargon-pages
+    with:
+      vocabulary_name: ${{ inputs.vocabulary_name }}
+    secrets: inherit
