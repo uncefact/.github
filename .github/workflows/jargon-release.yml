@@ -80,7 +80,7 @@ jobs:
 
       - name: create artifact tar
         run: |
-          tar -cvzf vocabulary.tar.gz vocab/${{ inputs.vocabulary_name }}.jsonld 
+          tar -cvzf vocabulary.tar.gz vocab/${{ inputs.vocabulary_name }}.jsonld vocab/merged.jsonld 
 
       - name: upload build details
         uses: actions/upload-artifact@v3
@@ -113,7 +113,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.event.client_payload.release.version }}
-          artifacts: 'vocab/${{ inputs.vocabulary_name }}.jsonld'
+          artifacts: 'vocab/${{ inputs.vocabulary_name }}.jsonld,vocab/merged.jsonld'
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: website update
