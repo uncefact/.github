@@ -122,3 +122,4 @@ jobs:
     uses: uncefact/vocabulary-outputs/.github/workflows/update-jargon.yml@jargon-pages
     with:
       vocabulary_name: ${{ inputs.vocabulary_name }}
+    secrets: inherit
