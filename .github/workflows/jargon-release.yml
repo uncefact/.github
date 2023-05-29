@@ -16,6 +16,17 @@ jobs:
       - uses: actions/checkout@v3
       - run: 'echo "vocabulary_name: ${{ inputs.vocabulary_name }}"'
 
+      - id: download-agriculture-vocabulary
+        if: ${{ inputs.vocabulary_name != 'agriculture' }}
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "uncefact/vocab-agriculture"
+          latest: true
+          fileName: "agriculture.jsonld"
+          out-file-path: "vocab"
+          tarBall: false
+          zipBall: false
+          extract: false
       - id: download-tourism-vocabulary
         if: ${{ inputs.vocabulary_name != 'tourism' }}
         uses: robinraju/release-downloader@v1.8
