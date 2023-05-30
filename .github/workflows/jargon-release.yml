@@ -38,6 +38,17 @@ jobs:
           tarBall: false
           zipBall: false
           extract: false
+      - id: download-finance-vocabulary
+        if: ${{ inputs.vocabulary_name != 'finance' }}
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "uncefact/vocab-finance"
+          latest: true
+          fileName: "finance.jsonld"
+          out-file-path: "vocab"
+          tarBall: false
+          zipBall: false
+          extract: false
       - id: download-core-vocabulary
         if: ${{ inputs.vocabulary_name != 'core' }}
         uses: robinraju/release-downloader@v1.8
