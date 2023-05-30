@@ -27,6 +27,17 @@ jobs:
           tarBall: false
           zipBall: false
           extract: false
+      - id: download-compliance-vocabulary
+        if: ${{ inputs.vocabulary_name != 'compliance' }}
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "uncefact/vocab-compliance"
+          latest: true
+          fileName: "compliance.jsonld"
+          out-file-path: "vocab"
+          tarBall: false
+          zipBall: false
+          extract: false
       - id: download-core-vocabulary
         if: ${{ inputs.vocabulary_name != 'core' }}
         uses: robinraju/release-downloader@v1.8
