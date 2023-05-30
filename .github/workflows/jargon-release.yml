@@ -27,6 +27,17 @@ jobs:
           tarBall: false
           zipBall: false
           extract: false
+      - id: download-core-vocabulary
+        if: ${{ inputs.vocabulary_name != 'core' }}
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "uncefact/vocab-core"
+          latest: true
+          fileName: "core.jsonld"
+          out-file-path: "vocab"
+          tarBall: false
+          zipBall: false
+          extract: false
       - id: download-tourism-vocabulary
         if: ${{ inputs.vocabulary_name != 'tourism' }}
         uses: robinraju/release-downloader@v1.8
