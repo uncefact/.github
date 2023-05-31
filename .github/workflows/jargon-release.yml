@@ -82,6 +82,17 @@ jobs:
           tarBall: false
           zipBall: false
           extract: false
+      - id: download-trade-vocabulary
+        if: ${{ inputs.vocabulary_name != 'trade' }}
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "uncefact/vocab-trade"
+          latest: true
+          fileName: "trade.jsonld"
+          out-file-path: "vocab"
+          tarBall: false
+          zipBall: false
+          extract: false
       - id: download-merge-utility
         uses: robinraju/release-downloader@v1.8
         with:
