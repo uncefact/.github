@@ -114,7 +114,7 @@ jobs:
       - run: 'mv merged.jsonld vocab/'
       - run: |
           rm vocab-jsonld-merge-1.0.2.jar
-          cd vocab && rm -- !(merged.jsonld|transport.jsonld)
+          cd vocab && rm -rf $(find . -name "*.jsonld" ! -name "merged.jsonld" ! -name "${{ inputs.vocabulary_name }}.jsonld")
       - name: snapshot PR
         uses: peter-evans/create-pull-request@v5
         with:
