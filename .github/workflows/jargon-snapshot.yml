@@ -98,7 +98,7 @@ jobs:
         with:
           repository: "uncefact/utilities"
           latest: true
-          fileName: "vocab-jsonld-merge-1.0.2.jar"
+          fileName: "vocab-jsonld-utility-1.0.0.jar"
           tarBall: false
           zipBall: false
           extract: false
@@ -110,10 +110,10 @@ jobs:
       - run: 'echo "field: ${{ github.event.client_payload.artefacts.jsonldVocab.fileName }}"'
       - run: 'wget -O ${{ inputs.vocabulary_name }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
       - run: 'mv ${{ inputs.vocabulary_name }}.jsonld vocab/'
-      - run: java -jar vocab-jsonld-merge-1.0.2.jar
+      - run: java -jar vocab-jsonld-utility-1.0.0.jar
       - run: 'mv merged.jsonld vocab/'
       - run: |
-          rm vocab-jsonld-merge-1.0.2.jar
+          rm vocab-jsonld-utility-1.0.0.jar
           cd vocab && rm -rf $(find . -name "*.jsonld" ! -name "merged.jsonld" ! -name "${{ inputs.vocabulary_name }}.jsonld")
       - name: snapshot PR
         uses: peter-evans/create-pull-request@v5
