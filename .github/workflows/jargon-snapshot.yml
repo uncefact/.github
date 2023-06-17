@@ -1,4 +1,4 @@
-name: jargon_onRelease
+name: jargon_onSnapshot
 
 on:
   workflow_call:
@@ -106,6 +106,7 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '11'
+      - run: 'echo "client_payload: ${{ github.event.client_payload }}"'
       - run: 'echo "field: ${{ github.event.client_payload.artefacts.jsonldVocab.url }}"'
       - run: 'echo "field: ${{ github.event.client_payload.artefacts.jsonldVocab.fileName }}"'
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.index }}"'
