@@ -108,6 +108,9 @@ jobs:
           java-version: '11'
       - run: 'echo "field: ${{ github.event.client_payload.artefacts.jsonldVocab.url }}"'
       - run: 'echo "field: ${{ github.event.client_payload.artefacts.jsonldVocab.fileName }}"'
+      - run: 'echo "field: ${{ github.event.client_payload.snapshot.index }}"'
+      - run: 'echo "field: ${{ github.event.client_payload.snapshot.description }}"'
+      - run: 'echo "field: ${{ github.event.client_payload.snapshot.url }}"'
       - run: 'wget -O ${{ inputs.vocabulary_name }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
       - run: 'mv ${{ inputs.vocabulary_name }}.jsonld vocab/'
       - run: java -jar vocab-jsonld-utility-1.0.0.jar -m "pretty-print" -d "vocab/" -i "${{ inputs.vocabulary_name }}.jsonld" -o "vocab/${{ inputs.vocabulary_name }}.jsonld"
@@ -120,13 +123,15 @@ jobs:
       - name: snapshot PR
         uses: peter-evans/create-pull-request@v5
         with:
-          commit-message: "chore: jargon snapshot preview"
+          commit-message: "chore: jargon snapshot#${{ github.event.client_payload.snapshot.index }}"
           delete-branch: true
-          title: 'chore: update vocabulary'
+          title: 'chore: update vocabulary using snapshot#${{ github.event.client_payload.snapshot.index }}'
           body: |
             Updates vocabulary triggered by created snapshot in the Jargon domain.
+            Snapshot description: ${{ github.event.client_payload.snapshot.description }}
+            Snapshot url: ${{ github.event.client_payload.snapshot.url }}
           base: 'main'
-          branch: create-pull-request/snapshot
+          branch: create-pull-request/snapshot-${{ github.event.client_payload.snapshot.index }}
           draft: true
           labels: '[FOR REVIEW]'
   pages_preview:
