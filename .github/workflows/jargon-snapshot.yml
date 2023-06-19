@@ -122,6 +122,7 @@ jobs:
           rm vocab-jsonld-utility-1.1.0.jar
           cd vocab && rm -rf $(find . -name "*.jsonld" ! -name "merged.jsonld" ! -name "${{ inputs.vocabulary_name }}.jsonld")
       - name: snapshot PR
+        id: cpr
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: "chore: jargon snapshot#${{ github.event.client_payload.snapshot.index }}"
@@ -135,6 +136,8 @@ jobs:
           branch: create-pull-request/snapshot-${{ github.event.client_payload.snapshot.index }}
           draft: true
           labels: '[FOR REVIEW]'
+    outputs:
+      pull-request-url: ${{ steps.cpr.outputs.pull-request-url }}
   pages_preview:
     needs:
       - merge
@@ -142,4 +145,5 @@ jobs:
     with:
       vocabulary_name: ${{ inputs.vocabulary_name }}
       branch_name: create-pull-request/snapshot-${{ github.event.client_payload.snapshot.index }}
+      pull_request_url: ${{needs.merge.outputs.pull-request-url}}
     secrets: inherit
