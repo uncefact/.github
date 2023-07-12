@@ -139,6 +139,13 @@ jobs:
           branch: create-pull-request/snapshot-${{ github.event.client_payload.snapshot.index }}
           draft: true
           labels: '[FOR REVIEW]'
+  post-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        repository: uncefact/vocab-${{ inputs.vocabulary_name }}
+        ref: create-pull-request/snapshot-${{ github.event.client_payload.snapshot.index }}
       - run: |
           [ -s vocab/${{ inputs.vocabulary_name }}.jsonld ] && echo "::notice file=${{ inputs.vocabulary_name }}.jsonld::Test notice annotation with vocabulary file"
       - run: |
