@@ -139,6 +139,8 @@ jobs:
           branch: create-pull-request/snapshot-${{ github.event.client_payload.snapshot.index }}
           draft: true
           labels: '[FOR REVIEW]'
+    outputs:
+      pull-request-url: ${{ steps.cpr.outputs.pull-request-url }}
   post-check:
     needs:
       - merge
@@ -154,8 +156,6 @@ jobs:
           [ -s out.md ] && echo "::warning file=out.md::Warnings occurred during vocabulary merge process"
       - run: |
           [ -s err.md ] && echo "::error file=err.md::Errors occurred during vocabulary merge process"
-    outputs:
-      pull-request-url: ${{ steps.cpr.outputs.pull-request-url }}
   pages_preview:
     needs:
       - merge
