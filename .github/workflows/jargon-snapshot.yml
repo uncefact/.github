@@ -140,8 +140,9 @@ jobs:
           draft: true
           labels: '[FOR REVIEW]'
   post-check:
+    needs:
+      - merge
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
         with:
