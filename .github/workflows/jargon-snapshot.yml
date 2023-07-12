@@ -124,11 +124,19 @@ jobs:
       - run: |
           rm ${{ env.utility_jar }}
           cd vocab && rm -rf $(find . -name "*.jsonld" ! -name "merged.jsonld" ! -name "${{ inputs.vocabulary_name }}.jsonld")
+      - name: Generate a token
+        id: generate_token
+        uses: tibdex/github-app-token@b62528385c34dbc9f38e5f4225ac829252d1ea92
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key:
+            ${{ secrets.APP_PRIVATE_KEY }}
       - name: snapshot PR
         id: cpr
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: "chore: jargon snapshot#${{ github.event.client_payload.snapshot.index }}"
+          token: ${{ steps.generate_token.outputs.token }}
           delete-branch: true
           title: 'chore: update vocabulary using snapshot#${{ github.event.client_payload.snapshot.index }}'
           body: |
