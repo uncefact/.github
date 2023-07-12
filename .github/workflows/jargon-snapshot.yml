@@ -122,12 +122,6 @@ jobs:
           java -jar ${{ env.utility_jar }} -m "merge" -o "vocab/merged.jsonld" -d "vocab/" \
           -i trade.jsonld -i transport.jsonld -i tourism.jsonld -i agriculture.jsonld -i compliance.jsonld -i finance.jsonld -i core.jsonld 
       - run: |
-          [ -s vocab/${{ inputs.vocabulary_name }}.jsonld ] && echo "::notice file=${{ inputs.vocabulary_name }}.jsonld::Test notice annotation with vocabulary file"
-      - run: |
-          [ -s out.md ] && echo "::warning file=out.md::Warnings occurred during vocabulary merge process"
-      - run: |
-          [ -s err.md ] && echo "::error file=err.md::Errors occurred during vocabulary merge process"
-      - run: |
           rm ${{ env.utility_jar }}
           cd vocab && rm -rf $(find . -name "*.jsonld" ! -name "merged.jsonld" ! -name "${{ inputs.vocabulary_name }}.jsonld")
       - name: snapshot PR
@@ -145,6 +139,12 @@ jobs:
           branch: create-pull-request/snapshot-${{ github.event.client_payload.snapshot.index }}
           draft: true
           labels: '[FOR REVIEW]'
+      - run: |
+          [ -s vocab/${{ inputs.vocabulary_name }}.jsonld ] && echo "::notice file=${{ inputs.vocabulary_name }}.jsonld::Test notice annotation with vocabulary file"
+      - run: |
+          [ -s out.md ] && echo "::warning file=out.md::Warnings occurred during vocabulary merge process"
+      - run: |
+          [ -s err.md ] && echo "::error file=err.md::Errors occurred during vocabulary merge process"
     outputs:
       pull-request-url: ${{ steps.cpr.outputs.pull-request-url }}
   pages_preview:
