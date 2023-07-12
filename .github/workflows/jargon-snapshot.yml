@@ -119,10 +119,10 @@ jobs:
       - run: 'mv ${{ inputs.vocabulary_name }}.jsonld vocab/'
       - run: java -jar ${{ env.utility_jar }} -m "pretty-print" -d "vocab/" -i "${{ inputs.vocabulary_name }}.jsonld" -o "vocab/${{ inputs.vocabulary_name }}.jsonld"
       - run: |
-          echo "Merging domains into a single vocabulary" >> $GITHUB_STEP_SUMMARY
           java -jar ${{ env.utility_jar }} -m "merge" -o "vocab/merged.jsonld" -d "vocab/" \
-          -i trade.jsonld -i transport.jsonld -i tourism.jsonld -i agriculture.jsonld -i compliance.jsonld -i finance.jsonld -i core.jsonld \
-          >> $GITHUB_STEP_SUMMARY
+          -i trade.jsonld -i transport.jsonld -i tourism.jsonld -i agriculture.jsonld -i compliance.jsonld -i finance.jsonld -i core.jsonld 
+          [ ! -s err.md ] && echo "::error file=err.md::Errors occurred during vocabulary merge process"
+          [ ! -s out.md ] && echo "::warning file=err.md::Errors occurred during vocabulary merge process"
       - run: |
           rm ${{ env.utility_jar }}
           cd vocab && rm -rf $(find . -name "*.jsonld" ! -name "merged.jsonld" ! -name "${{ inputs.vocabulary_name }}.jsonld")
