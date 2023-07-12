@@ -122,9 +122,9 @@ jobs:
           java -jar ${{ env.utility_jar }} -m "merge" -o "vocab/merged.jsonld" -d "vocab/" \
           -i trade.jsonld -i transport.jsonld -i tourism.jsonld -i agriculture.jsonld -i compliance.jsonld -i finance.jsonld -i core.jsonld 
       - run: |
-          [ -s err.md ] && echo "::error::Errors occurred during vocabulary merge process"
+          [ -s out.md ] && echo "::warning file=out.md::Warnings occurred during vocabulary merge process"
       - run: |
-          [ -s out.md ] && echo "::warning::Warnings occurred during vocabulary merge process"
+          [ -s err.md ] && echo "::error file=err.md::Errors occurred during vocabulary merge process"
       - run: |
           rm ${{ env.utility_jar }}
           cd vocab && rm -rf $(find . -name "*.jsonld" ! -name "merged.jsonld" ! -name "${{ inputs.vocabulary_name }}.jsonld")
