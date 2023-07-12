@@ -1,0 +1,14 @@
+name: Post-merge check
+
+on:
+  workflow_call:
+
+jobs:
+  post-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          [ -s out.md ] && echo "::warning file=out.md::Warnings occurred during vocabulary merge process"
+      - run: |
+          [ -s err.md ] && echo "::error file=err.md::Errors occurred during vocabulary merge process"
