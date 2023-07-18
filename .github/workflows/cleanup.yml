@@ -23,7 +23,6 @@ jobs:
       run: |
         echo "PR_STATE=merged" >> "$GITHUB_ENV"
     - name: "Closing the corresponding PR in vocabulary-outputs"
-      if: ${{ github.event.pull_request.merged != true }}
       env:
         GH_TOKEN:
           ${{ steps.generate_token.outputs.token }}
