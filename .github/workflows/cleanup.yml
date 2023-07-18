@@ -30,5 +30,4 @@ jobs:
       run: |
         gh pr close uncefact/${{ github.event.repository.name }}/pull/${{ github.event.pull_request.number }} \
         --repo uncefact/vocabulary-outputs \
-        --comment "The original PR has been ${{ env.PR_STATE }}." \
-        --delete-branch
+        --comment "The original PR has been ${{ env.PR_STATE }}."
