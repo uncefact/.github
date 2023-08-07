@@ -11,4 +11,4 @@ jobs:
       - run: |
           [ -s out.md ] && echo "::warning file=out.md::Warnings occurred during vocabulary merge process"
       - run: |
-          [ -s err.md ] && echo "::error file=err.md::Errors occurred during vocabulary merge process"
+          [ -s err.md ] && echo "::error file=err.md::Errors occurred during vocabulary merge process" && exit 1
