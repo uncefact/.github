@@ -1,10 +1,9 @@
 ## What's in the UN/CEFACT Github
 
 * vocab-{name} repositories are used to manage a suite of non-overlapping standard semantic vocabularies (classes, properties, codes) from the relevant business domain - presented in both human readable and JSON-LD formats. 
-* codes-{name} repositories are used to manage reference code lists like UN/LOCODE and to publish them as human readable & machine readable vocabulariues and expose the data via public APIs.
 * schema-{name} repositories are used to manage the development of models and specifications for specific business use cases presented as JSON-LD context files, JSON Schema and OpenAPI specifications. 
-* spec-{name) repositories are used to develop formal technical specifications that support domains and projects.\
-* project-{name} repositories are used to manage projects that do not fit into one of the standard categories above, such as the traceability project and the vckit project.
+* spec-{name) repositories are used to develop formal technical specifications.
+* project-{name} repositories are used to manage projects 
 
 ## Using and/or contributing to UN/CEFACT Github
 
