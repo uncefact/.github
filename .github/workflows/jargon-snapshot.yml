@@ -42,6 +42,7 @@ jobs:
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.description }}"'
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.url }}"'
       - run: 'wget -O ${{ github.event.client_payload.domain.name }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
+      - run: cat ${{ github.event.client_payload.domain.name }}.jsonld
       - run: |
           cp _data/mapping.json .
           rm -rf _data/
