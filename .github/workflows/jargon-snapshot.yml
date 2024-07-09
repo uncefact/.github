@@ -2,101 +2,27 @@ name: jargon_onSnapshot
 
 on:
   workflow_call:
-    inputs:
-      vocabulary_name:
-        description: 'Vocabulary name'
-        type: string
-        required: true
+    
 env:
   # Setting an environment variable with the value of a configuration variable
-  utility_jar: vocab-jsonld-utility-${{ vars.VOCAB_JSONLD_UTILITY_VERSION }}.jar
+  utility_jar: vocab-jsonld-utility-1.6.0.jar
+  domain_name: ${{ github.event.client_payload.domain.name }}
 
 jobs:
   merge:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      id-token: write
+
     steps:
       - uses: actions/checkout@v3
-      - run: 'echo "vocabulary_name: ${{ inputs.vocabulary_name }}"'
+        with:
+          ref: ${{ env.domain_name }}-pages
+      - run: 'echo "Domain name: ${{ github.event.client_payload.domain.name }}"'
 
-      - id: download-agriculture-vocabulary
-        if: ${{ inputs.vocabulary_name != 'agriculture' }}
-        uses: robinraju/release-downloader@v1.8
-        with:
-          repository: "uncefact/vocab-agriculture"
-          latest: true
-          fileName: "agriculture.jsonld"
-          out-file-path: "vocab"
-          tarBall: false
-          zipBall: false
-          extract: false
-      - id: download-compliance-vocabulary
-        if: ${{ inputs.vocabulary_name != 'compliance' }}
-        uses: robinraju/release-downloader@v1.8
-        with:
-          repository: "uncefact/vocab-compliance"
-          latest: true
-          fileName: "compliance.jsonld"
-          out-file-path: "vocab"
-          tarBall: false
-          zipBall: false
-          extract: false
-      - id: download-finance-vocabulary
-        if: ${{ inputs.vocabulary_name != 'finance' }}
-        uses: robinraju/release-downloader@v1.8
-        with:
-          repository: "uncefact/vocab-finance"
-          latest: true
-          fileName: "finance.jsonld"
-          out-file-path: "vocab"
-          tarBall: false
-          zipBall: false
-          extract: false
-      - id: download-core-vocabulary
-        if: ${{ inputs.vocabulary_name != 'core' }}
-        uses: robinraju/release-downloader@v1.8
-        with:
-          repository: "uncefact/vocab-core"
-          latest: true
-          fileName: "core.jsonld"
-          out-file-path: "vocab"
-          tarBall: false
-          zipBall: false
-          extract: false
-      - id: download-tourism-vocabulary
-        if: ${{ inputs.vocabulary_name != 'tourism' }}
-        uses: robinraju/release-downloader@v1.8
-        with:
-          repository: "uncefact/vocab-tourism"
-          latest: true
-          fileName: "tourism.jsonld"
-          out-file-path: "vocab"
-          tarBall: false
-          zipBall: false
-          extract: false
-      - id: download-transport-vocabulary
-        if: ${{ inputs.vocabulary_name != 'transport' }}
-        uses: robinraju/release-downloader@v1.8
-        with:
-          repository: "uncefact/vocab-transport"
-          latest: true
-          fileName: "transport.jsonld"
-          out-file-path: "vocab"
-          tarBall: false
-          zipBall: false
-          extract: false
-      - id: download-trade-vocabulary
-        if: ${{ inputs.vocabulary_name != 'trade' }}
-        uses: robinraju/release-downloader@v1.8
-        with:
-          repository: "uncefact/vocab-trade"
-          latest: true
-          fileName: "trade.jsonld"
-          out-file-path: "vocab"
-          tarBall: false
-          zipBall: false
-          extract: false
-      - id: download-merge-utility
+      - id: download-md-utility
         uses: robinraju/release-downloader@v1.8
         with:
           repository: "uncefact/utilities"
@@ -115,46 +41,24 @@ jobs:
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.index }}"'
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.description }}"'
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.url }}"'
-      - run: 'wget -O ${{ inputs.vocabulary_name }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
-      - run: 'mv ${{ inputs.vocabulary_name }}.jsonld vocab/'
-      - run: java -jar ${{ env.utility_jar }} -m "pretty-print" -d "vocab/" -i "${{ inputs.vocabulary_name }}.jsonld" -o "vocab/${{ inputs.vocabulary_name }}.jsonld"
+      - run: 'wget -O ${{ github.event.client_payload.domain.name }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
       - run: |
-          java -jar ${{ env.utility_jar }} -m "merge" -o "vocab/merged.jsonld" -d "vocab/" \
-          -i trade.jsonld -i transport.jsonld -i tourism.jsonld -i agriculture.jsonld -i compliance.jsonld -i finance.jsonld -i core.jsonld 
+          cp _data/mapping.json .
+          rm -rf _data/
+          rm -rf _properties/
+          rm -rf _clasees/
+          rm -rf _code-lists/ 
+      - run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i "${{ github.event.client_payload.domain.name }}.jsonld"
+      - run: mv mapping.json _data/
       - run: |
           rm ${{ env.utility_jar }}
-          cd vocab && rm -rf $(find . -name "*.jsonld" ! -name "merged.jsonld" ! -name "${{ inputs.vocabulary_name }}.jsonld")
-      - name: Generate a token
-        id: generate_token
-        uses: tibdex/github-app-token@b62528385c34dbc9f38e5f4225ac829252d1ea92
-        with:
-          app_id: ${{ secrets.APP_ID }}
-          private_key:
-            ${{ secrets.APP_PRIVATE_KEY }}
-      - name: snapshot PR
-        id: cpr
-        uses: peter-evans/create-pull-request@v5
-        with:
-          commit-message: "chore: jargon snapshot#${{ github.event.client_payload.snapshot.index }}"
-          token: ${{ steps.generate_token.outputs.token }}
-          delete-branch: true
-          title: 'chore: update vocabulary using snapshot#${{ github.event.client_payload.snapshot.index }}'
-          body: |
-            Updates vocabulary triggered by created snapshot in the Jargon domain.
-            Snapshot description: ${{ github.event.client_payload.snapshot.description }}
-            Snapshot url: ${{ github.event.client_payload.snapshot.url }}
-          base: 'main'
-          branch: create-pull-request/snapshot-${{ github.event.client_payload.snapshot.index }}
-          draft: true
-          labels: '[FOR REVIEW]'
-    outputs:
-      pull-request-url: ${{ steps.cpr.outputs.pull-request-url }}
-  pages_preview:
-    needs:
-      - merge
-    uses: uncefact/vocabulary-outputs/.github/workflows/update-jargon.yml@jargon-pages
-    with:
-      vocabulary_name: ${{ inputs.vocabulary_name }}
-      branch_name: create-pull-request/snapshot-${{ github.event.client_payload.snapshot.index }}
-      pull_request_url: ${{needs.merge.outputs.pull-request-url}}
-    secrets: inherit
+      
+      - name: update the domain branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+          git commit -m "${{ github.event.client_payload.snapshot.description }}"
+
+          git push origin ${{ env.domain_name }}-pages
