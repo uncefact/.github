@@ -48,9 +48,7 @@ jobs:
           rm -rf _properties/
           rm -rf _clasees/
           rm -rf _code-lists/ 
-      - run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i "${{ github.event.client_payload.domain.name }}.jsonld"
-      - run: cat err.md
-      - run: cat out.md
+      - run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i "${{ github.event.client_payload.domain.name }}.jsonld" & cat out.md | cat err.md
       - run: mv mapping.json _data/
       - run: |
           rm ${{ env.utility_jar }}
