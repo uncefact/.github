@@ -42,7 +42,15 @@ jobs:
           printf '%s\n' "$CLIENT_PAYLOAD" > client_payload.json
           cat client_payload.json
           rm client_payload.json
-          echo "baseurl=$(echo "${{ env.domain_name }}" | sed -r 's/[-]+/\//g')" >> $GITHUB_ENV
+      - id: sets-a-baseulr
+        name: output a baseurl for the release
+        run: |
+          baseurl=$(echo "${{ env.domain_name }}" | sed -r 's/[-]+/\//g')
+          echo "baseurl=$baseurl" >> "$GITHUB_OUTPUT"
+      - name: Use that secret output (protected by a mask)
+        run: |
+          echo "the baseurl is ${{ steps.sets-a-baseulr.outputs.baseulr }}"
+
       - run: 'wget -O ${{ github.event.client_payload.domain.name }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
       #https://jargon.sh/user/unece/untp-core/s/0/artefacts/jsonldContexts/untp-core.jsonld?class=untp-core
       - run: 'wget -O ${{ github.event.client_payload.domain.name }}-context.jsonld https://jargon.sh/user/unece/${{ env.domain_name }}/v/${{ github.event.client_payload.release.version }}/artefacts/jsonldContexts/${{ env.domain_name }}.jsonld?class=${{ env.domain_name }}'
@@ -66,9 +74,10 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          yq -i '.baseurl="${baseurl}/${{ github.event.client_payload.release.version }}"' _config_preview.yml 
+          yq -i '.baseurl=${{ steps.sets-a-baseulr.outputs.baseulr }}/${{ github.event.client_payload.release.version }}' _config_preview.yml 
 
           git add .
+          
           git commit -m "Release ${{ github.event.client_payload.release.version }}" || echo -e "nothing to commit"
  
           git tag -a $baseurl/${{ github.event.client_payload.release.version }} -m "Release ${{ github.event.client_payload.release.version }}"
