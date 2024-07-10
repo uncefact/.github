@@ -48,7 +48,9 @@ jobs:
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.description }}"'
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.url }}"'
       - run: 'wget -O ${{ github.event.client_payload.domain.name }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
-      - run: 'wget -O ${{ github.event.client_payload.domain.name }}-context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}'
+      #https://jargon.sh/user/unece/untp-core/s/0/artefacts/jsonldContexts/untp-core.jsonld?class=untp-core
+      - run: 'wget -O ${{ github.event.client_payload.domain.name }}-context.jsonld https://jargon.sh/user/unece/${{ env.domain_name }}/s/${{ github.event.client_payload.snapshot.index }}/artefacts/jsonldContexts/${{ env.domain_name }}.jsonld?class=${{ env.domain_name }}'
+      #- run: 'wget -O ${{ github.event.client_payload.domain.name }}-context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}'
       - run: cat ${{ github.event.client_payload.domain.name }}.jsonld
       - run: |
           cp _data/mapping.json .
