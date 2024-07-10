@@ -5,7 +5,7 @@ on:
     
 env:
   # Setting an environment variable with the value of a configuration variable
-  utility_jar: vocab-jsonld-utility-1.6.1.jar
+  utility_jar: vocab-jsonld-utility-1.6.2.jar
   domain_name: ${{ github.event.client_payload.domain.name }}
 
 jobs:
@@ -42,6 +42,7 @@ jobs:
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.description }}"'
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.url }}"'
       - run: 'wget -O ${{ github.event.client_payload.domain.name }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
+      - run: 'wget -O ${{ github.event.client_payload.domain.name }}-context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}'
       - run: cat ${{ github.event.client_payload.domain.name }}.jsonld
       - run: |
           cp _data/mapping.json .
