@@ -42,6 +42,7 @@ jobs:
         run: |
           printf '%s\n' "$CLIENT_PAYLOAD" > client_payload.json
           cat client_payload.json
+          rm client_payload.json
       - run: 'echo "field: ${{ github.event.client_payload.artefacts.jsonldVocab.url }}"'
       - run: 'echo "field: ${{ github.event.client_payload.artefacts.jsonldVocab.fileName }}"'
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.index }}"'
@@ -62,6 +63,8 @@ jobs:
       - run: mv mapping.json _data/
       - run: |
           rm ${{ env.utility_jar }}
+          rm batch-add.json
+          rm batch-delete.json
       
       - name: update the domain branch
         run: |
