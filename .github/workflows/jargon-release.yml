@@ -74,7 +74,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          yq -i '.baseurl="vocabulary/${{ steps.sets-a-baseulr.outputs.baseurl }}/${{ github.event.client_payload.release.version }}"' _config_preview.yml 
+          yq -i '.baseurl="/vocabulary/${{ steps.sets-a-baseulr.outputs.baseurl }}/${{ github.event.client_payload.release.version }}"' _config_preview.yml 
 
           git add .
           
