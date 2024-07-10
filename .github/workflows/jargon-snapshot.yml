@@ -36,6 +36,12 @@ jobs:
           distribution: 'adopt'
           java-version: '11'
       - run: 'echo "client_payload: ${{ github.event.client_payload }}"'
+      - shell: bash
+        env:
+          CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+        run: |
+          printf '%s\n' "$CLIENT_PAYLOAD" > client_payload.json
+          cat client_payload.json
       - run: 'echo "field: ${{ github.event.client_payload.artefacts.jsonldVocab.url }}"'
       - run: 'echo "field: ${{ github.event.client_payload.artefacts.jsonldVocab.fileName }}"'
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.index }}"'
