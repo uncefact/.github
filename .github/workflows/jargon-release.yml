@@ -63,7 +63,7 @@ jobs:
           rm -rf _classes/
           rm -rf _code-lists/ 
       - run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i ${{ github.event.client_payload.domain.name }}.jsonld && cat out.md || cat err.md
-      - run: jq '.${{ github.event.client_payload.domain.name }} = "/vocabulary/${{ steps.sets-a-baseulr.outputs.baseurl }}/${{ github.event.client_payload.release.version }}/"' mapping.json
+      - run: jq '."${{ github.event.client_payload.domain.name }}" = "/vocabulary/${{ steps.sets-a-baseulr.outputs.baseurl }}/${{ github.event.client_payload.release.version }}/"' mapping.json
       - run: mv mapping.json _data/
       - run: |
           rm ${{ env.utility_jar }}
