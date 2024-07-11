@@ -49,7 +49,7 @@ jobs:
           version=$(echo "${{ github.event.client_payload.release.version }}" | sed -r 's/[.]+/\//g')
           domain_name="${{ env.domain_name }}"
           echo "tag_name=$baseurl/$version" >> "$GITHUB_OUTPUT"
-          echo "baseurl=/vocabulary/$baseurl/$version/" >> "$GITHUB_OUTPUT"
+          echo "baseurl=/vocabulary/$baseurl/$version" >> "$GITHUB_OUTPUT"
           echo "domain_name=$domain_name" >> "$GITHUB_OUTPUT"
       - name: Print the baseurl
         run: |
@@ -67,7 +67,7 @@ jobs:
           rm -rf _classes/
           rm -rf _code-lists/ 
       - run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i ${{ steps.set-env.outputs.domain_name }}.jsonld && cat out.md || cat err.md
-      - run: jq '."${{ steps.set-env.outputs.domain_name }}" = "${{ steps.set-env.outputs.baseurl }}"' mapping.json > _data/mapping.json
+      - run: jq '."${{ steps.set-env.outputs.domain_name }}" = "${{ steps.set-env.outputs.baseurl }}/"' mapping.json > _data/mapping.json
       - run: rm mapping.json
       - run: |
           rm ${{ env.utility_jar }}
