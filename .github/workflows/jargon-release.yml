@@ -93,19 +93,6 @@ jobs:
           git push origin ${{ steps.set-env.outputs.tag_name }}
           git push origin ${{ env.domain_name }}-pages
       
-      - name: Create release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ steps.set-env.outputs.tag_name }}
-        run: |
-          gh release create "$tag" --draft \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "Pre-release for $tag" --notes "Published at https://test.uncefact.org${{ steps.set-env.outputs.baseurl }}/about"
-          gh release upload "$tag" \
-          --repo "$GITHUB_REPOSITORY" \
-          ${{ env.domain_name }}.jsonld ${{ env.domain_name }}-context.jsonld
-
-    
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -118,3 +105,18 @@ jobs:
         run: |
           aws s3 sync ./_site/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.baseurl }} --delete --cache-control max-age=604800
           aws cloudfront create-invalidation --distribution-id "E32QP2QS6SXRHC" --paths "${{ steps.set-env.outputs.baseurl }}/*"
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.set-env.outputs.tag_name }}
+        run: |
+          gh release create "$tag" --draft \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Pre-release for $tag" --notes "Published at https://test.uncefact.org${{ steps.set-env.outputs.baseurl }}/about"
+          gh release upload "$tag" \
+          --repo "$GITHUB_REPOSITORY" \
+          ${{ env.domain_name }}.jsonld ${{ env.domain_name }}-context.jsonld
+  
+      
+  
