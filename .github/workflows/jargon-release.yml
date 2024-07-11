@@ -47,7 +47,7 @@ jobs:
         run: |
           baseurl=$(echo "${{ env.domain_name }}" | sed -r 's/[-]+/\//g')
           version=$(echo "${{ github.event.client_payload.release.version }}" | sed -r 's/[.]+/\//g')
-          domain_name="${{ env.domain_name }}
+          domain_name="${{ env.domain_name }}"
           echo "tag_name=$baseurl/$version" >> "$GITHUB_OUTPUT"
           echo "baseurl=/$baseurl/$version/" >> "$GITHUB_OUTPUT"
           echo "domain_name=$domain_name" >> "$GITHUB_OUTPUT"
