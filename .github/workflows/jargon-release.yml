@@ -91,6 +91,7 @@ jobs:
           git tag -a ${{ steps.set-env.outputs.tag_name }} -m "Release ${{ github.event.client_payload.release.version }}"
 
           git push origin ${{ steps.set-env.outputs.tag_name }}
+          git push origin ${{ env.domain_name }}-pages
       
       - name: Create release
         env:
