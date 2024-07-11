@@ -51,7 +51,7 @@ jobs:
           baseurl=$(echo "${{ env.domain_name }}" | sed -r 's/[-]+/\//g')
           version=$(echo "${{ github.event.client_payload.release.version }}" | sed -r 's/[.]+/\//g')
           domain_name="${{ env.domain_name }}"
-          echo "tag_name=$baseurl/$version" >> "$GITHUB_OUTPUT"
+          echo "tag_name=${{ env.domain_name }}-${{ github.event.client_payload.release.version }}" >> "$GITHUB_OUTPUT"
           echo "baseurl=/vocabulary/$baseurl/$version" >> "$GITHUB_OUTPUT"
           echo "domain_name=$domain_name" >> "$GITHUB_OUTPUT"
       - name: Print the baseurl
@@ -91,6 +91,15 @@ jobs:
           git tag -a ${{ steps.set-env.outputs.tag_name }} -m "Release ${{ github.event.client_payload.release.version }}"
 
           git push origin ${{ steps.set-env.outputs.tag_name }}
+      
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.set-env.outputs.tag_name }}
+        run: |
+          gh release create "$tag" --draft \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="Pre-release for $tag. Published at https://test.uncefact.org${{ steps.set-env.outputs.baseurl }}/about"
 
     
       - name: Set up Ruby
