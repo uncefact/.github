@@ -4,6 +4,9 @@ on:
   workflow_call:
     
 env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: 'us-west-1'
   # Setting an environment variable with the value of a configuration variable
   utility_jar: vocab-jsonld-utility-1.6.2.jar
   domain_name: ${{ github.event.client_payload.domain.name }}
@@ -88,3 +91,17 @@ jobs:
           git tag -a ${{ steps.set-env.outputs.tag_name }} -m "Release ${{ github.event.client_payload.release.version }}"
 
           git push origin ${{ steps.set-env.outputs.tag_name }}
+
+    
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "2.6.5" # Not needed with a .ruby-version file
+      - name: "Bundle install"
+        run: bundle install
+      - name: "Build Site"
+        run: bundle exec jekyll build --config _config_preview.yml
+      - name: "Deploy to AWS S3"
+        run: |
+          aws s3 sync ./_site/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.baseurl }} --delete --cache-control max-age=604800
+          aws cloudfront create-invalidation --distribution-id "E32QP2QS6SXRHC" --paths "${{ steps.set-env.outputs.baseurl }}/*"
