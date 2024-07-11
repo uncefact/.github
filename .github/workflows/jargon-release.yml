@@ -42,28 +42,32 @@ jobs:
           printf '%s\n' "$CLIENT_PAYLOAD" > client_payload.json
           cat client_payload.json
           rm client_payload.json
-      - id: sets-a-baseulr
+      - id: set-env
         name: output a baseurl for the release
         run: |
           baseurl=$(echo "${{ env.domain_name }}" | sed -r 's/[-]+/\//g')
-          echo "baseurl=$baseurl" >> "$GITHUB_OUTPUT"
+          version=$(echo "${{ github.event.client_payload.release.version }}" | sed -r 's/[.]+/\//g')
+          domain_name="${{ env.domain_name }}
+          echo "tag_name=$baseurl/$version" >> "$GITHUB_OUTPUT"
+          echo "baseurl=/$baseurl/$version/" >> "$GITHUB_OUTPUT"
+          echo "domain_name=$domain_name" >> "$GITHUB_OUTPUT"
       - name: Print the baseurl
         run: |
-          echo "the baseurl is ${{ steps.sets-a-baseulr.outputs.baseurl }}"
+          echo "the baseurl is ${{ steps.set-env.outputs.baseurl }}"
 
-      - run: 'wget -O ${{ github.event.client_payload.domain.name }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
+      - run: 'wget -O ${{ steps.set-env.outputs.domain_name }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
       #https://jargon.sh/user/unece/untp-core/s/0/artefacts/jsonldContexts/untp-core.jsonld?class=untp-core
-      - run: 'wget -O ${{ github.event.client_payload.domain.name }}-context.jsonld https://jargon.sh/user/unece/${{ env.domain_name }}/v/${{ github.event.client_payload.release.version }}/artefacts/jsonldContexts/${{ env.domain_name }}.jsonld?class=${{ env.domain_name }}'
-      #- run: 'wget -O ${{ github.event.client_payload.domain.name }}-context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}'
-      - run: cat ${{ github.event.client_payload.domain.name }}.jsonld
+      - run: 'wget -O ${{ steps.set-env.outputs.domain_name }}-context.jsonld https://jargon.sh/user/unece/${{ env.domain_name }}/v/${{ github.event.client_payload.release.version }}/artefacts/jsonldContexts/${{ env.domain_name }}.jsonld?class=${{ env.domain_name }}'
+      #- run: 'wget -O ${{ env.domain_name }}-context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}'
+      - run: cat ${{ steps.set-env.outputs.domain_name }}.jsonld
       - run: |
           cp _data/mapping.json .
           rm -rf _data/
           rm -rf _properties/
           rm -rf _classes/
           rm -rf _code-lists/ 
-      - run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i ${{ github.event.client_payload.domain.name }}.jsonld && cat out.md || cat err.md
-      - run: jq '."${{ github.event.client_payload.domain.name }}" = "/vocabulary/${{ steps.sets-a-baseulr.outputs.baseurl }}/${{ github.event.client_payload.release.version }}/"' mapping.json > _data/mapping.json
+      - run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i ${{ steps.set-env.outputs.domain_name }}.jsonld && cat out.md || cat err.md
+      - run: jq '."${{ steps.set-env.outputs.domain_name }}" = "${{ steps.set-env.outputs.baseurl }}"' mapping.json > _data/mapping.json
       - run: rm mapping.json
       - run: |
           rm ${{ env.utility_jar }}
@@ -75,12 +79,12 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          yq -i '.baseurl="/vocabulary/${{ steps.sets-a-baseulr.outputs.baseurl }}/${{ github.event.client_payload.release.version }}"' _config_preview.yml 
+          yq -i '.baseurl="${{ steps.set-env.outputs.baseurl }}"' _config_preview.yml 
 
           git add .
           
           git commit -m "Release ${{ github.event.client_payload.release.version }}" || echo -e "nothing to commit"
  
-          git tag -a ${{ steps.sets-a-baseulr.outputs.baseurl }}/${{ github.event.client_payload.release.version }} -m "Release ${{ github.event.client_payload.release.version }}"
+          git tag -a ${{ steps.set-env.outputs.tag_name }} -m "Release ${{ github.event.client_payload.release.version }}"
 
-          git push origin ${{ steps.sets-a-baseulr.outputs.baseurl }}/${{ github.event.client_payload.release.version }}
+          git push origin ${{ steps.set-env.outputs.tag_name }}
