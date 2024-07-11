@@ -98,8 +98,11 @@ jobs:
           tag: ${{ steps.set-env.outputs.tag_name }}
         run: |
           gh release create "$tag" --draft \
-              --repo "$GITHUB_REPOSITORY" \
-              --title "Pre-release for $tag" --notes "Published at https://test.uncefact.org${{ steps.set-env.outputs.baseurl }}/about"
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Pre-release for $tag" --notes "Published at https://test.uncefact.org${{ steps.set-env.outputs.baseurl }}/about"
+          gh release upload "$tag" \
+          --repo "$GITHUB_REPOSITORY" \
+          ${{ env.domain_name }}.jsonld ${{ env.domain_name }}-context.jsonld
 
     
       - name: Set up Ruby
