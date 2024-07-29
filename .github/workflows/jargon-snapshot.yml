@@ -21,6 +21,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ env.prefix }}-pages
+          token: ${{ secrets.PAT_TOKEN }}
       - run: 'echo "Domain name: ${{ env.domain_name }}"'
 
       - id: download-md-utility
