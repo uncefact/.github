@@ -51,7 +51,6 @@ jobs:
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.description }}"'
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.url }}"'
       - run: 'wget -O ${{ env.prefix}}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
-      #https://jargon.sh/user/unece/untp-core/s/0/artefacts/jsonldContexts/untp-core.jsonld?class=untp-core
       - run: 'wget -O ${{ env.prefix }}-context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}'
       - run: cat ${{ env.prefix }}.jsonld
       - run: |
