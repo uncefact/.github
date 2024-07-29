@@ -82,7 +82,6 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          yq -i '.baseurl="${{ steps.set-env.outputs.baseurl }}"' _config_preview.yml 
           yq -i '.versions.${{ env.domain_name }}="${{ github.event.client_payload.release.version }}"' _config_preview.yml 
 
           git add .
@@ -94,6 +93,8 @@ jobs:
           git push origin ${{ steps.set-env.outputs.tag_name }}
           git push origin ${{ env.domain_name }}-pages
       
+          yq -i '.baseurl="${{ steps.set-env.outputs.baseurl }}"' _config_preview.yml 
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
