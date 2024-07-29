@@ -6,7 +6,8 @@ on:
 env:
   # Setting an environment variable with the value of a configuration variable
   utility_jar: vocab-jsonld-utility-1.6.3.jar
-  domain_name: ${{ github.event.client_payload.settings.jsonld.prefix }}
+  domain_name: ${{ github.event.client_payload.domain.name }}
+  prefix: ${{ github.event.client_payload.settings.jsonld.prefix }}
 
 jobs:
   merge:
@@ -19,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ env.domain_name }}-pages
+          ref: ${{ env.prefix }}-pages
       - run: 'echo "Domain name: ${{ env.domain_name }}"'
 
       - id: download-md-utility
@@ -48,19 +49,20 @@ jobs:
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.index }}"'
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.description }}"'
       - run: 'echo "field: ${{ github.event.client_payload.snapshot.url }}"'
-      - run: 'wget -O ${{ env.domain_name}}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
+      - run: 'wget -O ${{ env.prefix}}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
       #https://jargon.sh/user/unece/untp-core/s/0/artefacts/jsonldContexts/untp-core.jsonld?class=untp-core
-      - run: 'wget -O ${{ env.domain_name }}-context.jsonld https://jargon.sh/user/unece/${{ env.domain_name }}/s/${{ github.event.client_payload.snapshot.index }}/artefacts/jsonldContexts/${{ env.domain_name }}.jsonld?class=${{ env.domain_name }}'
-      #- run: 'wget -O ${{ env.domain_name }}-context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}'
-      - run: cat ${{ env.domain_name }}.jsonld
+      - run: 'wget -O ${{ env.prefix }}-context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}'
+      - run: cat ${{ env.prefix }}.jsonld
       - run: |
           cp _data/mapping.json .
+          cp _data/versions.json .
           rm -rf _data/
           rm -rf _properties/
           rm -rf _classes/
           rm -rf _code-lists/ 
-      - run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i ${{ env.domain_name }}.jsonld && cat out.md || cat err.md
+      - run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i ${{ env.prefix }}.jsonld && cat out.md || cat err.md
       - run: mv mapping.json _data/
+      - run: mv versions.json _data/
       - run: |
           rm ${{ env.utility_jar }}
           rm batch-add.json
@@ -74,4 +76,4 @@ jobs:
           git add .
           git commit -m "${{ github.event.client_payload.snapshot.description }}"
 
-          git push origin ${{ env.domain_name }}-pages
+          git push origin ${{ env.prefix }}-pages
