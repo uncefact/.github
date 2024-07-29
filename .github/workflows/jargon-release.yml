@@ -72,6 +72,7 @@ jobs:
           rm -rf _code-lists/ 
       - run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i ${{ steps.set-env.outputs.domain_name }}.jsonld && cat out.md || cat err.md
       - run: jq '."${{ steps.set-env.outputs.domain_name }}" = "${{ steps.set-env.outputs.baseurl }}/"' mapping.json > _data/mapping.json
+      - run: cp versions.json _data/
       - run: rm mapping.json
       - run: rm versions.json
       - run: |
