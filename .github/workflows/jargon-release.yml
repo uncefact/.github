@@ -98,7 +98,6 @@ jobs:
 
           cp _data/mapping.json .      
           jq '."${{ env.prefix }}" = "${{ steps.set-env.outputs.baseurl }}/"' mapping.json > _data/mapping.json
-          cp versions.json _data/
           yq -i '.baseurl="${{ steps.set-env.outputs.baseurl }}"' _config_preview.yml 
 
       - name: Set up Ruby
