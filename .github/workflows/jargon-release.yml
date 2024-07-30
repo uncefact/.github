@@ -60,10 +60,10 @@ jobs:
         run: |
           echo "the baseurl is ${{ steps.set-env.outputs.baseurl }}"
 
-      - run: 'wget -O ${{ env.prefix }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }} && cat out.md || cat err.md' 
-      - run: 'wget -O ${{ env.prefix }}-context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }} && cat out.md || cat err.md'
-      - run: 'wget -O ${{ env.prefix }}-schema.json ${{ github.event.client_payload.artefacts.jsonSchemas[0].url }} && cat out.md || cat err.md'
-      - run: 'wget -O ${{ env.prefix }}-instance.json ${{ github.event.client_payload.artefacts.jsonSchemas[1].url }} && cat out.md || cat err.md'
+      - run: 'wget -O ${{ env.prefix }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }} || echo -e "jsonldVocab not found"' 
+      - run: 'wget -O ${{ env.prefix }}-context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}|| echo -e "jsonldContext not found"'
+      - run: 'wget -O ${{ env.prefix }}-schema.json ${{ github.event.client_payload.artefacts.jsonSchemas[0].url }} || echo -e "jsonSchemas not found"'
+      - run: 'wget -O ${{ env.prefix }}-instance.json ${{ github.event.client_payload.artefacts.jsonSchemas[1].url }} || echo -e "jsonSchemas not found"'
       - run: cat ${{ env.prefix }}.jsonld
       - run: |
           cp _data/mapping.json .
