@@ -62,6 +62,8 @@ jobs:
 
       - run: 'wget -O ${{ env.prefix }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
       - run: 'wget -O ${{ env.prefix }}-context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}'
+      - run: 'wget -O ${{ env.prefix }}-schema.jsonld ${{ github.event.client_payload.artefacts.jsonSchemas[0].url }}'
+      - run: 'wget -O ${{ env.prefix }}-instance.jsonld ${{ github.event.client_payload.artefacts.jsonSchemas[1].url }}'
       - run: cat ${{ env.prefix }}.jsonld
       - run: |
           cp _data/mapping.json .
@@ -125,6 +127,12 @@ jobs:
           
           [[ -s ${{ env.prefix }}-context.jsonld ]] && gh release upload "$tag" \
           --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-context.jsonld
+
+          [[ -s ${{ env.prefix }}-schema.jsonld ]] && gh release upload "$tag" \
+          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-schema.jsonld
+
+          [[ -s ${{ env.prefix }}-instance.jsonld ]] && gh release upload "$tag" \
+          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-instance.jsonld
   
       
   
