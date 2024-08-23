@@ -140,6 +140,7 @@ jobs:
         with:
           ref: untp-pages
           path: untp-pages
+          token: ${{ secrets.PAT_TOKEN }}
       
       - name: update untp-pages branch
         working-directory: ./untp-pages
