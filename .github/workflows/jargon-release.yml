@@ -51,19 +51,19 @@ jobs:
         name: output a baseurl for the release
         run: |
           baseurl=$(echo "${{ env.prefix }}" | sed -r 's/[-]+/\//g')
-          version=$(echo "${{ github.event.client_payload.release.version }}" | sed -r 's/[.]+/\//g')
+          major_version=$(echo "${{ github.event.client_payload.release.version }}" | cut -d. -f1)
           domain_name="${{ env.domain_name }}"
           echo "tag_name=${{ env.prefix }}-${{ github.event.client_payload.release.version }}" >> "$GITHUB_OUTPUT"
-          echo "baseurl=/vocabulary/$baseurl/$version" >> "$GITHUB_OUTPUT"
+          echo "baseurl=/vocabulary/$baseurl/$major_version" >> "$GITHUB_OUTPUT"
           echo "domain_name=$domain_name" >> "$GITHUB_OUTPUT"
       - name: Print the baseurl
         run: |
           echo "the baseurl is ${{ steps.set-env.outputs.baseurl }}"
 
       - run: 'wget -O ${{ env.prefix }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }} || echo -e "jsonldVocab not found"' 
-      - run: 'wget -O ${{ env.prefix }}-context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}|| echo -e "jsonldContext not found"'
-      - run: 'wget -O ${{ env.prefix }}-schema.json ${{ github.event.client_payload.artefacts.jsonSchemas[0].url }} || echo -e "jsonSchemas not found"'
-      - run: 'wget -O ${{ env.prefix }}-instance.json ${{ github.event.client_payload.artefacts.jsonSchemas[1].url }} || echo -e "jsonSchemas not found"'
+      - run: 'wget -O ${{ env.prefix }}-context-${{ github.event.client_payload.release.version }}.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}|| echo -e "jsonldContext not found"'
+      - run: 'wget -O ${{ env.prefix }}-schema-${{ github.event.client_payload.release.version }}.json ${{ github.event.client_payload.artefacts.jsonSchemas[0].url }} || echo -e "jsonSchemas not found"'
+      - run: 'wget -O ${{ env.prefix }}-instance-${{ github.event.client_payload.release.version }}.json ${{ github.event.client_payload.artefacts.jsonSchemas[1].url }} || echo -e "jsonSchemas not found"'
       - run: cat ${{ env.prefix }}.jsonld
       - run: |
           cp _data/mapping.json .
@@ -125,13 +125,13 @@ jobs:
           --repo "$GITHUB_REPOSITORY" \
           ${{ env.prefix }}.jsonld
           
-          [[ -s ${{ env.prefix }}-context.jsonld ]] && gh release upload "$tag" \
+          [[ -s ${{ env.prefix }}-context-${{ github.event.client_payload.release.version }}.jsonld ]] && gh release upload "$tag" \
           --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-context.jsonld
 
-          [[ -s ${{ env.prefix }}-schema.json ]] && gh release upload "$tag" \
+          [[ -s ${{ env.prefix }}-schema-${{ github.event.client_payload.release.version }}.json ]] && gh release upload "$tag" \
           --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-schema.json
 
-          [[ -s ${{ env.prefix }}-instance.json ]] && gh release upload "$tag" \
+          [[ -s ${{ env.prefix }}-instance-${{ github.event.client_payload.release.version }}.json ]] && gh release upload "$tag" \
           --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-instance.json
   
       
