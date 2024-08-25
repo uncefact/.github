@@ -126,13 +126,13 @@ jobs:
           ${{ env.prefix }}.jsonld
           
           [[ -s ${{ env.prefix }}-context-${{ github.event.client_payload.release.version }}.jsonld ]] && gh release upload "$tag" \
-          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-context.jsonld
+          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-context-${{ github.event.client_payload.release.version }}.jsonld
 
           [[ -s ${{ env.prefix }}-schema-${{ github.event.client_payload.release.version }}.json ]] && gh release upload "$tag" \
-          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-schema.json
+          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-schema-${{ github.event.client_payload.release.version }}.json
 
           [[ -s ${{ env.prefix }}-instance-${{ github.event.client_payload.release.version }}.json ]] && gh release upload "$tag" \
-          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-instance.json
+          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-instance-${{ github.event.client_payload.release.version }}.json
   
       
   
