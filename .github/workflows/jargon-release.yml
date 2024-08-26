@@ -8,9 +8,10 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: 'us-west-1'
   # Setting an environment variable with the value of a configuration variable
-  utility_jar: vocab-jsonld-utility-1.6.3.jar
+  utility_jar: vocab-jsonld-utility-1.6.4.jar
   domain_name: ${{ github.event.client_payload.domain.name }}
   prefix: ${{ github.event.client_payload.settings.jsonld.prefix }}
+  version: ${{ github.event.client_payload.release.version }}
 
 jobs:
   update:
@@ -50,29 +51,43 @@ jobs:
         name: output a baseurl for the release
         run: |
           baseurl=$(echo "${{ env.prefix }}" | sed -r 's/[-]+/\//g')
-          major_version=$(echo "${{ github.event.client_payload.release.version }}" | cut -d. -f1)
+          major_version=$(echo "${{ env.version }}" | cut -d. -f1)
           domain_name="${{ env.domain_name }}"
-          echo "tag_name=${{ env.prefix }}-${{ github.event.client_payload.release.version }}" >> "$GITHUB_OUTPUT"
+          echo "tag_name=${{ env.prefix }}-${{ env.version }}" >> "$GITHUB_OUTPUT"
           echo "baseurl=/vocabulary/$baseurl/$major_version" >> "$GITHUB_OUTPUT"
           echo "domain_name=$domain_name" >> "$GITHUB_OUTPUT"
       - name: Print the baseurl
         run: |
           echo "the baseurl is ${{ steps.set-env.outputs.baseurl }}"
 
-      - run: 'wget -O ${{ env.prefix }}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }} || echo -e "jsonldVocab not found"' 
-      - run: 'wget -O ${{ env.prefix }}-context-${{ github.event.client_payload.release.version }}.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}|| echo -e "jsonldContext not found"'
-      - run: 'wget -O ${{ env.prefix }}-schema-${{ github.event.client_payload.release.version }}.json ${{ github.event.client_payload.artefacts.jsonSchemas[0].url }} || echo -e "jsonSchemas not found"'
-      - run: 'wget -O ${{ env.prefix }}-instance-${{ github.event.client_payload.release.version }}.json ${{ github.event.client_payload.artefacts.jsonSchemas[1].url }} || echo -e "jsonSchemas not found"'
-      - run: cat ${{ env.prefix }}.jsonld
       - run: |
-          cp _data/mapping.json .
+          artefact_url=${{ github.event.client_payload.artefacts.jsonldVocab.url }}
+          artefact=${{ env.prefix }}.jsonld
+          wget -O $artefact $artefact_url && \
+          sed -i 's/vocabulary.uncefact.org\/untp/test.uncefact.org\/vocabulary\/untp/g' $artefact || echo -e "jsonldVocab not found"
+      - run: |
+          artefact_url=${{ github.event.client_payload.artefacts.jsonldContext.url }}
+          artefact=${{ env.prefix }}-context-${{ env.version }}.jsonld
+          wget -O $artefact $artefact_url && \
+          sed -i 's/vocabulary.uncefact.org\/untp/test.uncefact.org\/vocabulary\/untp/g' $artefact || echo -e "jsonldContext not found"
+      - run: 
+          artefact_url=${{ github.event.client_payload.artefacts.jsonSchemas[0].url }}
+          artefact=${{ env.prefix }}-schema-${{ env.version }}.json
+          wget -O $artefact $artefact_url && \
+          sed -i 's/vocabulary.uncefact.org\/untp/test.uncefact.org\/vocabulary\/untp/g' $artefact || echo -e "jsonSchema not found"
+      - run: |
+          artefact_url=${{ github.event.client_payload.artefacts.jsonSchemas[1].url }}
+          artefact=${{ env.prefix }}-instance-${{ env.version }}.json
+          wget -O $artefact $artefact_url && \
+          sed -i 's/vocabulary.uncefact.org\/untp/test.uncefact.org\/vocabulary\/untp/g' $artefact || echo -e "jsonInstance not found"
+#      - run: cat ${{ env.prefix }}.jsonld
+      - run: |
           cp _data/versions.json .
           rm -rf _data/
           rm -rf _properties/
           rm -rf _classes/
           rm -rf _code-lists/ 
       - run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i ${{ env.prefix }}.jsonld && cat out.md || cat err.md
-      - run: mv mapping.json _data/
       - run: mv versions.json _data/
       - run: |
           rm ${{ env.utility_jar }}
@@ -84,19 +99,14 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          yq -i '.versions.${{ env.prefix }}="${{ github.event.client_payload.release.version }}"' _config_preview.yml 
+          yq -i '.versions.${{ env.prefix }}="${{ env.version }}"' _config_preview.yml 
 
-          git add .
-          
-          git commit -m "Release ${{ github.event.client_payload.release.version }}" || echo -e "nothing to commit"
- 
-          git tag -a ${{ steps.set-env.outputs.tag_name }} -m "Release ${{ github.event.client_payload.release.version }}"
-
+          git add .          
+          git commit -m "Release ${{ env.version }}" || echo -e "nothing to commit" 
+          git tag -a ${{ steps.set-env.outputs.tag_name }} -m "Release ${{ env.version }}"
           git push origin ${{ steps.set-env.outputs.tag_name }}
           git push origin ${{ env.prefix }}-pages
 
-          cp _data/mapping.json .      
-          jq '."${{ env.prefix }}" = "${{ steps.set-env.outputs.baseurl }}/"' mapping.json > _data/mapping.json
           yq -i '.baseurl="${{ steps.set-env.outputs.baseurl }}"' _config_preview.yml 
 
       - name: Set up Ruby
@@ -120,18 +130,16 @@ jobs:
           gh release create "$tag" --draft \
             --repo "$GITHUB_REPOSITORY" \
             --title "Pre-release for $tag" --notes "Published at https://test.uncefact.org${{ steps.set-env.outputs.baseurl }}/about"
-          gh release upload "$tag" \
-          --repo "$GITHUB_REPOSITORY" \
-          ${{ env.prefix }}.jsonld
+          gh release upload "$tag" --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}.jsonld
           
-          [[ -s ${{ env.prefix }}-context-${{ github.event.client_payload.release.version }}.jsonld ]] && gh release upload "$tag" \
-          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-context-${{ github.event.client_payload.release.version }}.jsonld
+          [[ -s ${{ env.prefix }}-context-${{ env.version }}.jsonld ]] && gh release upload "$tag" \
+          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-context-${{ env.version }}.jsonld
 
-          [[ -s ${{ env.prefix }}-schema-${{ github.event.client_payload.release.version }}.json ]] && gh release upload "$tag" \
-          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-schema-${{ github.event.client_payload.release.version }}.json
+          [[ -s ${{ env.prefix }}-schema-${{ env.version }}.json ]] && gh release upload "$tag" \
+          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-schema-${{ env.version }}.json
 
-          [[ -s ${{ env.prefix }}-instance-${{ github.event.client_payload.release.version }}.json ]] && gh release upload "$tag" \
-          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-instance-${{ github.event.client_payload.release.version }}.json
+          [[ -s ${{ env.prefix }}-instance-${{ env.version }}.json ]] && gh release upload "$tag" \
+          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-instance-${{ env.version }}.json
   
       
   
@@ -147,11 +155,11 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          yq -i '.versions.${{ env.prefix }}="${{ github.event.client_payload.release.version }}"' _config_preview.yml 
+          yq -i '.versions.${{ env.prefix }}="${{ env.version }}"' _config_preview.yml 
 
           git add .
           
-          git commit -m "Update version for ${{ env.prefix }} to ${{ github.event.client_payload.release.version }}" || echo -e "nothing to commit"
+          git commit -m "Update version for ${{ env.prefix }} to ${{ env.version }}" || echo -e "nothing to commit"
   
           git push origin untp-pages
   
