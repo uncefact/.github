@@ -8,7 +8,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: 'us-west-1'
   # Setting an environment variable with the value of a configuration variable
-  utility_jar: vocab-jsonld-utility-1.6.4.jar
+  utility_jar: vocab-jsonld-utility-1.6.5.jar
   domain_name: ${{ github.event.client_payload.domain.name }}
   prefix: ${{ github.event.client_payload.settings.jsonld.prefix }}
   version: ${{ github.event.client_payload.release.version }}
