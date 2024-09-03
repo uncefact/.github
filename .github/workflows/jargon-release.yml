@@ -134,6 +134,8 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --title "Pre-release for $tag" --notes "Published at https://test.uncefact.org${{ steps.set-env.outputs.baseurl }}/about"
           gh release upload "$tag" --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}.jsonld
+
+          cd _artefacts/
           
           [[ -s ${{ env.prefix }}-context-${{ env.version }}.jsonld ]] && gh release upload "$tag" \
           --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-context-${{ env.version }}.jsonld
