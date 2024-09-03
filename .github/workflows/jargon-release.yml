@@ -61,7 +61,7 @@ jobs:
         run: |
           echo "the baseurl is ${{ steps.set-env.outputs.baseurl }}"
       - run: |
-          mkdir _artefacts
+          mkdir _artefacts || echo -e "skip"
 
       - run: |
           artefact_url=${{ github.event.client_payload.artefacts.jsonldVocab.url }}
