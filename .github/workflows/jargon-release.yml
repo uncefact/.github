@@ -65,7 +65,7 @@ jobs:
 
       - run: |
           artefact_url=${{ github.event.client_payload.artefacts.jsonldVocab.url }}
-          artefact="${{ env.prefix }}.jsonld
+          artefact=${{ env.prefix }}.jsonld
           wget -O $artefact $artefact_url && \
           sed -i 's/vocabulary.uncefact.org\/untp/test.uncefact.org\/vocabulary\/untp/g' $artefact || echo -e "jsonldVocab not found"
       - run: |
