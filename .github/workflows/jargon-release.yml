@@ -54,33 +54,35 @@ jobs:
           major_version=$(echo "${{ env.version }}" | cut -d. -f1)
           domain_name="${{ env.domain_name }}"
           echo "tag_name=${{ env.prefix }}-${{ env.version }}" >> "$GITHUB_OUTPUT"
+          echo "artefacts_path=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
           echo "baseurl=/vocabulary/$baseurl/$major_version" >> "$GITHUB_OUTPUT"
           echo "domain_name=$domain_name" >> "$GITHUB_OUTPUT"
       - name: Print the baseurl
         run: |
           echo "the baseurl is ${{ steps.set-env.outputs.baseurl }}"
+      - run: |
+          mkdir _artefacts
 
       - run: |
           artefact_url=${{ github.event.client_payload.artefacts.jsonldVocab.url }}
-          artefact=${{ env.prefix }}.jsonld
+          artefact="${{ env.prefix }}.jsonld
           wget -O $artefact $artefact_url && \
           sed -i 's/vocabulary.uncefact.org\/untp/test.uncefact.org\/vocabulary\/untp/g' $artefact || echo -e "jsonldVocab not found"
       - run: |
           artefact_url=${{ github.event.client_payload.artefacts.jsonldContext.url }}
-          artefact=${{ env.prefix }}-context-${{ env.version }}.jsonld
+          artefact="_artefacts/${{ env.prefix }}-context-${{ env.version }}.jsonld"
           wget -O $artefact $artefact_url && \
           sed -i 's/vocabulary.uncefact.org\/untp/test.uncefact.org\/vocabulary\/untp/g' $artefact || echo -e "jsonldContext not found"
       - run: |
           artefact_url=${{ github.event.client_payload.artefacts.jsonSchemas[0].url }}
-          artefact=${{ env.prefix }}-schema-${{ env.version }}.json
+          artefact="_artefacts/${{ env.prefix }}-schema-${{ env.version }}.json"
           wget -O $artefact $artefact_url && \
           sed -i 's/vocabulary.uncefact.org\/untp/test.uncefact.org\/vocabulary\/untp/g' $artefact || echo -e "jsonSchema not found"
       - run: |
           artefact_url=${{ github.event.client_payload.artefacts.jsonSchemas[1].url }}
-          artefact=${{ env.prefix }}-instance-${{ env.version }}.json
+          artefact="_artefacts/${{ env.prefix }}-instance-${{ env.version }}.json"
           wget -O $artefact $artefact_url && \
           sed -i 's/vocabulary.uncefact.org\/untp/test.uncefact.org\/vocabulary\/untp/g' $artefact || echo -e "jsonInstance not found"
-#      - run: cat ${{ env.prefix }}.jsonld
       - run: |
           cp _data/versions.json .
           rm -rf _data/
@@ -119,8 +121,9 @@ jobs:
         run: bundle exec jekyll build --config _config_preview.yml
       - name: "Deploy to AWS S3"
         run: |
+          aws s3 sync ./_artefacts/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.artefact_url }} --cache-control max-age=604800
           aws s3 sync ./_site/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.baseurl }} --delete --cache-control max-age=604800
-          aws cloudfront create-invalidation --distribution-id "E32QP2QS6SXRHC" --paths "${{ steps.set-env.outputs.baseurl }}/*"
+          aws cloudfront create-invalidation --distribution-id "E32QP2QS6SXRHC" --paths "${{ steps.set-env.outputs.artefact_url }}/*"
 
       - name: Create release
         env:
