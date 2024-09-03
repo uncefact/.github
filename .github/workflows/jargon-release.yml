@@ -121,9 +121,9 @@ jobs:
         run: bundle exec jekyll build --config _config_preview.yml
       - name: "Deploy to AWS S3"
         run: |
-          aws s3 sync ./_artefacts/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.artefact_url }} --cache-control max-age=604800
+          aws s3 sync ./_artefacts/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.artefacts_path }} --cache-control max-age=604800
           aws s3 sync ./_site/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.baseurl }} --delete --cache-control max-age=604800
-          aws cloudfront create-invalidation --distribution-id "E32QP2QS6SXRHC" --paths "${{ steps.set-env.outputs.artefact_url }}/*"
+          aws cloudfront create-invalidation --distribution-id "E32QP2QS6SXRHC" --paths "${{ steps.set-env.outputs.artefacts_path }}/*"
 
       - name: Create release
         env:
