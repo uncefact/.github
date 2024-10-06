@@ -138,13 +138,13 @@ jobs:
           cd _artefacts/
           
           [[ -f ${{ env.prefix }}-context-${{ env.version }}.jsonld ]] && gh release upload "$tag" \
-          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-context-${{ env.version }}.jsonld
+          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-context-${{ env.version }}.jsonld || echo -e "no context file"
 
           [[ -f ${{ env.prefix }}-schema-${{ env.version }}.json ]] && gh release upload "$tag" \
-          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-schema-${{ env.version }}.json
+          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-schema-${{ env.version }}.json || echo -e "no schema file"
 
           [[ -f ${{ env.prefix }}-instance-${{ env.version }}.json ]] && gh release upload "$tag" \
-          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-instance-${{ env.version }}.json
+          --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-instance-${{ env.version }}.json || echo -e "no instance file"
   
       
   
