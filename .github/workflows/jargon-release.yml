@@ -137,13 +137,13 @@ jobs:
 
           cd _artefacts/
           
-          [[ -s ${{ env.prefix }}-context-${{ env.version }}.jsonld ]] && gh release upload "$tag" \
+          [[ -f ${{ env.prefix }}-context-${{ env.version }}.jsonld ]] && gh release upload "$tag" \
           --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-context-${{ env.version }}.jsonld
 
-          [[ -s ${{ env.prefix }}-schema-${{ env.version }}.json ]] && gh release upload "$tag" \
+          [[ -f ${{ env.prefix }}-schema-${{ env.version }}.json ]] && gh release upload "$tag" \
           --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-schema-${{ env.version }}.json
 
-          [[ -s ${{ env.prefix }}-instance-${{ env.version }}.json ]] && gh release upload "$tag" \
+          [[ -f ${{ env.prefix }}-instance-${{ env.version }}.json ]] && gh release upload "$tag" \
           --repo "$GITHUB_REPOSITORY" ${{ env.prefix }}-instance-${{ env.version }}.json
   
       
