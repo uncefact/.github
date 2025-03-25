@@ -93,8 +93,8 @@ jobs:
       - run: mv versions.json _data/
       - run: |
           rm ${{ env.utility_jar }}
-          rm batch-add.json
-          rm batch-delete.json
+          rm batch-add.json || echo -e "skip"
+          rm batch-delete.json || echo -e "skip"
       
       - name: update the domain branch
         run: |
