@@ -33,7 +33,10 @@ jobs:
           cat client_payload.json
           rm client_payload.json
       
-      - working-directory: "data-models/${{ env.domain_name }}/"
+      - working-directory: "data-models/"
+        run: '[ -d ${{ env.prefix }} ] || mkdir ${{ env.prefix }}'
+      
+      - working-directory: "data-models/${{ env.prefix }}/"
         run: |
           'wget -O jargon.json ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
           'wget -O artefacts/context.json ${{ github.event.client_payload.artefacts.jsonldContext.url }}'
