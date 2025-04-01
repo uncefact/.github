@@ -32,13 +32,7 @@ jobs:
           printf '%s\n' "$CLIENT_PAYLOAD" > client_payload.json
           cat client_payload.json
           rm client_payload.json
-      - run: |
-          'echo "field: ${{ github.event.client_payload.artefacts.jsonldVocab.url }}"'
-          'echo "field: ${{ github.event.client_payload.artefacts.jsonldVocab.fileName }}"'
-          'echo "field: ${{ github.event.client_payload.snapshot.index }}"'
-          'echo "field: ${{ github.event.client_payload.snapshot.description }}"'
-          'echo "field: ${{ github.event.client_payload.snapshot.url }}"'
-
+      
       - working-directory: "data-models/${{ env.domain_name }}/"
         run: |
           'wget -O jargon.json ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
