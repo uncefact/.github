@@ -1,0 +1,79 @@
+name: jargon_onSnapshot (outdated version)
+
+on:
+  workflow_call:
+    
+env:
+  # Setting an environment variable with the value of a configuration variable
+  utility_jar: vocab-jsonld-utility-1.6.3.jar
+  domain_name: ${{ github.event.client_payload.domain.name }}
+  prefix: ${{ github.event.client_payload.settings.jsonld.prefix }}
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ env.prefix }}-pages
+          token: ${{ secrets.PAT_TOKEN }}
+      - run: 'echo "Domain name: ${{ env.domain_name }}"'
+
+      - id: download-md-utility
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "uncefact/utilities"
+          latest: true
+          fileName: "${{ env.utility_jar }}"
+          tarBall: false
+          zipBall: false
+          extract: false
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+      - run: 'echo "client_payload: ${{ github.event.client_payload }}"'
+      - shell: bash
+        env:
+          CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+        run: |
+          printf '%s\n' "$CLIENT_PAYLOAD" > client_payload.json
+          cat client_payload.json
+          rm client_payload.json
+      - run: 'echo "field: ${{ github.event.client_payload.artefacts.jsonldVocab.url }}"'
+      - run: 'echo "field: ${{ github.event.client_payload.artefacts.jsonldVocab.fileName }}"'
+      - run: 'echo "field: ${{ github.event.client_payload.snapshot.index }}"'
+      - run: 'echo "field: ${{ github.event.client_payload.snapshot.description }}"'
+      - run: 'echo "field: ${{ github.event.client_payload.snapshot.url }}"'
+      - run: 'wget -O ${{ env.prefix}}.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
+      - run: 'wget -O ${{ env.prefix }}-context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}'
+      - run: cat ${{ env.prefix }}.jsonld
+      - run: |
+          cp _data/mapping.json .
+          cp _data/versions.json .
+          rm -rf _data/
+          rm -rf _properties/
+          rm -rf _classes/
+          rm -rf _code-lists/ 
+      - run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i ${{ env.prefix }}.jsonld && cat out.md || cat err.md
+      - run: mv mapping.json _data/
+      - run: mv versions.json _data/
+      - run: |
+          rm ${{ env.utility_jar }}
+          rm batch-add.json
+          rm batch-delete.json
+      
+      - name: update the domain branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+          git commit -m "${{ github.event.client_payload.snapshot.description }}"
+
+          git push origin ${{ env.prefix }}-pages
