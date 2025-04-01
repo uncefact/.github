@@ -36,12 +36,17 @@ jobs:
       - working-directory: "data-models/"
         run: '[ -d ${{ env.prefix }} ] || mkdir ${{ env.prefix }}'
       
+      - working-directory: "data-models/${{ env.prefix }}"
+        run: '[ -d artefacts ] || mkdir artefacts'
+
+      - working-directory: "data-models/"
+        run: 'ls -la'
       - working-directory: "data-models/${{ env.prefix }}/"
         run: |
-          'wget -O jargon.json ${{ github.event.client_payload.artefacts.jsonldVocab.url }}'
-          'wget -O artefacts/context.json ${{ github.event.client_payload.artefacts.jsonldContext.url }}'
-          'wget -O artefacts/schema.json ${{ github.event.client_payload.artefacts.jsonSchemas[0].url }}'
-          'wget -O artefacts/sample.json ${{ github.event.client_payload.artefacts.jsonSchemas[1].url }}'
+          wget -O jargon.json ${{ github.event.client_payload.artefacts.jsonldVocab.url }}
+          wget -O artefacts/context.json ${{ github.event.client_payload.artefacts.jsonldContext.url }}
+          wget -O artefacts/schema.json ${{ github.event.client_payload.artefacts.jsonSchemas[0].url }}
+          wget -O artefacts/sample.json ${{ github.event.client_payload.artefacts.jsonSchemas[1].url }}
       
       - name: Create Pull Request
         id: cpr
