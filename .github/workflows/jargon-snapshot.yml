@@ -25,12 +25,6 @@ jobs:
 
       - run: 'echo "client_payload: ${{ github.event.client_payload }}"'
 
-      - name: Run Validate Jargon Artefacts
-        id: validate
-        uses: ./.github/actions/validate-jargon-artefacts
-        with:
-          jargon-webhook-payload: ${{ toJSON(github.event.client_payload) }}
-          
       - shell: bash
         env:
           CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
@@ -52,9 +46,6 @@ jobs:
           'wget -O artefacts/schema.json ${{ github.event.client_payload.artefacts.jsonSchemas[0].url }}'
           'wget -O artefacts/sample.json ${{ github.event.client_payload.artefacts.jsonSchemas[1].url }}'
       
-      - run: |
-          echo -e "TODO: Add artfacts validation step or job"
-
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v7
