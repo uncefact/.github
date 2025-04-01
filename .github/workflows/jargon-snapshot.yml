@@ -61,3 +61,4 @@ jobs:
           body: |
             sync data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}
           draft: false
+          token: ${{ secrets.PAT_TOKEN }}
