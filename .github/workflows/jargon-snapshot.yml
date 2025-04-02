@@ -47,6 +47,7 @@ jobs:
             elseif
                 filename="$filename-schema"
             fi
+            schema_url=${schema_url} | tr -d '\"'
             wget -O artefacts/${filename}.json ${schema_url}
           done
       - name: Create Pull Request
