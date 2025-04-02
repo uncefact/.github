@@ -35,20 +35,28 @@ jobs:
 
       - name: Download files
         working-directory: "data-models/${{ env.prefix }}/"
+        shell: bash
         run: |
-          wget -O jargon.json ${{ github.event.client_payload.artefacts.jsonldVocab.url }}
-          wget -O artefacts/context.json ${{ github.event.client_payload.artefacts.jsonldContext.url }}
-          wget -O artefacts/schema.json ${{ github.event.client_payload.artefacts.jsonSchemas[0].url }}
-          wget -O artefacts/sample.json ${{ github.event.client_payload.artefacts.jsonSchemas[1].url }}
-      
+          wget -O vocabulary.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}
+          wget -O artefacts/context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}
+
+          for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -c '.[].url'); do
+            filename=${schema_url#*=}
+            if [[ "$filename" =~ .*_instance$ ]]; then
+                filename="$filename-instance"
+            elseif
+                filename="$filename-schema"
+            fi
+            wget -O artefacts/${filename}.json ${schema_url}
+          done
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
-          commit-message: 'chore: sync data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}'
+          commit-message: 'chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}'
           committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           signoff: false
-          branch: feature/jargon-sync-${{ github.event.client_payload.snapshot.index }}
+          branch: feature/jargon-sync-${{ env.prefix }}
           delete-branch: true
           title: 'chore: sync data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}'
           body: |
