@@ -43,7 +43,7 @@ jobs:
           for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[].url'); do
             filename=${schema_url#*=}
             if [[ "$filename" =~ .*_instance$ ]]; then
-                filename="$filename-instance"
+                filename=${filename//_/-}
             else
                 filename="$filename-schema"
             fi
@@ -58,7 +58,7 @@ jobs:
           signoff: false
           branch: feature/jargon-sync-${{ env.prefix }}
           delete-branch: true
-          title: 'chore: sync data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}'
+          title: 'chore: sync ${{ github.event.client_payload.domain.name }}data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}'
           body: |
             ${{ github.event.client_payload.snapshot.description }}
           draft: false
