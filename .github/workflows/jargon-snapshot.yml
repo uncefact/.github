@@ -40,14 +40,14 @@ jobs:
           wget -O vocabulary.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}
           wget -O artefacts/context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}
 
-          for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -c '.[].url'); do
+          for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[].url'); do
             filename=${schema_url#*=}
             if [[ "$filename" =~ .*_instance$ ]]; then
                 filename="$filename-instance"
             elseif
                 filename="$filename-schema"
             fi
-            curl -L $schema_url -o "artefacts/${filename}.json"
+            wget -O artefacts/${filename}.json ${schema_url} | tr -d '\"'
           done
       - name: Create Pull Request
         id: cpr
