@@ -8,5 +8,5 @@
 ## Using and/or contributing to UN/CEFACT Github
 
 * All IP is owned by UN/CEFACT and is made freely available for use as per the [governence rules](https://github.com/uncefact/governance)
-* Anyone may provide feeedback or ask questions - either by raising an issue in the relevant repository (issues tab) or by [Joining Slack](https://join.slack.com/t/uncefact/shared_invite/zt-1d7hd0js1-sS1Xgk8DawQD9VgRvy1QHQ) and chatting in the channel of the same name.
+* Anyone may provide feeedback or ask questions - either by raising an issue in the relevant repository (issues tab) or by [Joining Slack](https://join.slack.com/t/uncefact/shared_invite/zt-35d2dcrn7-2KEYgff22ob7BtQcprolkg) and chatting in the channel of the same name.
 * Contributions to our standards work are made via pull requests but are only accepted from registered UN/CEFACT members [join here](https://uncefact.unece.org/display/uncefactpublic/UNCEFACT+Expert+Registration)
