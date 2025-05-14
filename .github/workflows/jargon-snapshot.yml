@@ -24,7 +24,6 @@ jobs:
         with:
           application_id: ${{ secrets.APP_ID }}
           application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
-          permissions: "contents:write,pull-requests:write"
       - uses: actions/checkout@v4
         with:
           ref: data-models-staging
