@@ -31,8 +31,8 @@ jobs:
       - run: 'echo "Domain name: ${{ env.domain_name }}"'
       - run: 'echo "client_payload: ${{ github.event.client_payload }}"'
 
-      - name: Check if ${{ env.prefix }} is not blank
-        run: '[ -z "${{ env.prefix }}" ] && echo -e "settings.jsonld.prefix is empty" && exit 1'
+      - name: Check if settings.jsonld.prefix is not blank
+        run: '[ -z "${{ env.prefix }}" ] && echo -e "settings.jsonld.prefix is blank" && exit 1'
       
       - name: Check if ${{ env.prefix }} directory exists
         working-directory: "data-models/"
