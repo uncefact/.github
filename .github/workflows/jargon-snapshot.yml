@@ -32,7 +32,7 @@ jobs:
       - run: 'echo "client_payload: ${{ github.event.client_payload }}"'
 
       - name: Check if settings.jsonld.prefix is not blank
-        run: '[ -z "$prefix" ] && exit 1'
+        run: '[ "${{ env.prefix }}" = "" ] && exit 1'
       
       - name: Check if ${{ env.prefix }} directory exists
         working-directory: "data-models/"
