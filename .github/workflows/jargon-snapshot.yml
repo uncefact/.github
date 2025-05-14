@@ -61,6 +61,7 @@ jobs:
         with:
           commit-message: 'chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}'
           committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           signoff: false
           branch: feature/jargon-sync-${{ env.prefix }}
           delete-branch: true
