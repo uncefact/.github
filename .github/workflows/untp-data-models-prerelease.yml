@@ -46,12 +46,37 @@ jobs:
       matrix:
         data-model: ${{ fromJSON(needs.define-matrix.outputs.data-models) }}
 
+    env:  
+      data-model: ${{ matrix.data-model }}
+      utility_jar: vocab-jsonld-utility-1.6.5.jar
+      #domain_name: ${{ matrix.data-model }}
+      prefix: ${{ matrix.data-model }}
+      version: ${{ inputs.tag_name}}
+
     steps: 
     - name: Update ${{ matrix.data-model }} 
-      env:  
-        data-model: ${{ matrix.data-model }}
       run: |
-        echo "$data-model" 
+        echo $data-model
       
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.tag_name}}
+        path: spec-untp/
 
+    - name: Get Token
+      id: get_workflow_token
+      uses: peter-murray/workflow-application-token-action@v4
+      with:
+        application_id: ${{ secrets.APP_ID }}
+        application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+        permissions: "contents:write"
 
+    - name: checkout_vocabulary_outputs
+      uses: actions/checkout@v4
+      with:
+        repository: uncefact/vocabulary-outputs
+        ref: ${{ env.prefix }}-pages
+        token: ${{ steps.get_workflow_token.outputs.token }}
+        fetch-depth: 1
+        path: vocabulary-outputs
+  
