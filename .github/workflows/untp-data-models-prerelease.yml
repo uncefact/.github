@@ -31,6 +31,7 @@ jobs:
           path: spec-untp/
 
       - name: build data models matrix
+        working-directory: spec-untp/
         id: data-models-matrix
         run: |
           find . -maxdepth 1 -type d -not -path . | sed 's/^.\///' | jq -R . | jq -s '{data-models: .}' >> "$GITHUB_OUTPUT"
