@@ -97,11 +97,12 @@ jobs:
   
   
     - id: download-md-utility
-      uses: robinraju/release-downloader@v1.8
+      uses: robinraju/release-downloader@v1.12
       with:
         repository: "uncefact/utilities"
         latest: true
         fileName: "${{ env.utility_jar }}"
+        out-file-path: "vocabulary-outputs"
         tarBall: false
         zipBall: false
         extract: false
