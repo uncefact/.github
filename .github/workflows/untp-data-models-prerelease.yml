@@ -35,7 +35,7 @@ jobs:
         shell: bash
         id: data-models-matrix
         run: |
-          find . -maxdepth 1 -type d -not -path . | sed 's/^.\///' | jq -R . | jq -s '{data-models: \".\"}' > data-models.json
+          find . -maxdepth 1 -type d -not -path . | sed 's/^.\///' | jq -R . | jq -s .' > data-models.json
           cat data-models.json > "$GITHUB_OUTPUT"
 
 
