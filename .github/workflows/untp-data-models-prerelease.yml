@@ -106,6 +106,9 @@ jobs:
         tarBall: false
         zipBall: false
         extract: false
+    - working-directory: vocabulary-outputs
+      run: |
+        ls -la .
     - uses: actions/setup-java@v3
       with:
         distribution: 'adopt'
