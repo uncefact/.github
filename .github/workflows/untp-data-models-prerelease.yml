@@ -36,6 +36,7 @@ jobs:
         id: data-models-matrix
         run: |
           find . -maxdepth 1 -type d -not -path . | sed 's/^.\///' | jq -R . | jq -s -c . > data-models.json
+          cat data-models.json
           echo data-models=$(cat data-models.json) >> "$GITHUB_OUTPUT"
 
 
