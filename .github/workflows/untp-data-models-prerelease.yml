@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      colors: ${{ steps.data-models-matrix.outputs.data-models }}
+      data-models: ${{ steps.data-models-matrix.outputs.data-models }}
 
     steps:
       - uses: actions/checkout@v4
