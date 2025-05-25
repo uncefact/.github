@@ -79,4 +79,19 @@ jobs:
         token: ${{ steps.get_workflow_token.outputs.token }}
         fetch-depth: 1
         path: vocabulary-outputs
+    - id: set-env
+      name: output a baseurl for the release
+      run: |
+        baseurl=$(echo "${{ env.prefix }}" | sed -r 's/[-]+/\//g')
+        major_version=$(echo "${{ env.version }}" | cut -d. -f1 | cut -dv -f2)
+        echo "tag_name=${{ env.prefix }}-${{ env.version }}" >> "$GITHUB_OUTPUT"
+        echo "artefacts_path=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
+        echo "baseurl=/vocabulary/$baseurl/$major_version" >> "$GITHUB_OUTPUT"
+    - name: Print the baseurl
+      run: |
+        echo "the baseurl is ${{ steps.set-env.outputs.baseurl }}"
+    - run: |
+        cp spec-untp/data-models/${{ env.prefix }}/vocabulary.jsonld vocabulary-outputs/${{ env.prefix }}.jsonld
+        cp spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld vocabulary-outputs/${{ steps.set-env.outputs.tag_name }}-context.jsonld
+  
   
