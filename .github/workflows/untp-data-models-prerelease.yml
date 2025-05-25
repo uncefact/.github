@@ -31,10 +31,11 @@ jobs:
           path: spec-untp/
 
       - name: build data models matrix
-        working-directory: spec-untp/
+        working-directory: spec-untp/data-models
         id: data-models-matrix
         run: |
-          find . -maxdepth 1 -type d -not -path . | sed 's/^.\///' | jq -R . | jq -s '{data-models: .}' >> "$GITHUB_OUTPUT"
+          find . -maxdepth 1 -type d -not -path . | sed 's/^.\///' | jq -R . | jq -s '{data-models: .}' > data-models.json
+          cat data-models.json > "$GITHUB_OUTPUT"
 
 
   publish-prerelease:
