@@ -32,6 +32,7 @@ jobs:
 
       - name: build data models matrix
         working-directory: spec-untp/data-models
+        shell: bash
         id: data-models-matrix
         run: |
           find . -maxdepth 1 -type d -not -path . | sed 's/^.\///' | jq -R . | jq -s '{data-models: .}' > data-models.json
