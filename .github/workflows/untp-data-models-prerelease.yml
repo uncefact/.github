@@ -122,7 +122,7 @@ jobs:
         rm -rf _classes/
         rm -rf _code-lists/ 
     - working-directory: vocabulary-outputs
-      run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i ${{ env.prefix }}.jsonld && cat out.md || cat err.md && exi 1
+      run: java -jar ${{ env.utility_jar }} -m "md" -d "./" -i ${{ env.prefix }}.jsonld && cat out.md || (cat err.md && exit 1)
     - working-directory: vocabulary-outputs
       run: mv versions.json _data/
     - working-directory: vocabulary-outputs
