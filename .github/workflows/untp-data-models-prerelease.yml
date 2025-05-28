@@ -139,7 +139,7 @@ jobs:
 
         yq -i '.versions.${{ env.prefix }}="${{ env.version }}"' _config_preview.yml 
 
-        git checkout -b ${{ env.prefix }}-pages-tmp
+        git checkout ${{ env.prefix }}-pages-tmp
         git add .          
         git commit -m "Release ${{ env.version }}" || echo -e "nothing to commit" 
         git tag -a ${{ steps.set-env.outputs.tag_name }} -m "Release ${{ env.version }}"
