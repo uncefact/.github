@@ -58,6 +58,27 @@ jobs:
             fi
             wget -O artefacts/${filename}.json ${schema_url}
           done
+
+      - name: Prepare PR title and body
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
+        run: |
+          prs=$(gh pr list \
+              --head 'feature/jargon-sync-${{ env.prefix }}' \
+              --base 'data-models-staging' \
+              --json title,body')
+          #TODO: add a check that there is a single match or none
+          pr_title=$(echo $prs | jq '.[].title')
+          default_pr_title='chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}'
+          pr_title=${pr_title:-$default_pr_title}
+          pr_body=$(echo $prs | jq '.[].body')
+          default_pr_body='${{ github.event.client_payload.snapshot.description }}'
+          pr_body="$pr_body\n$default_pr_body"         
+          
+          echo "pr_title=$pr_title" >> "$GITHUB_ENV"
+          echo "pr_body=$pr_body" >> "$GITHUB_ENV"
+
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v7
@@ -68,8 +89,8 @@ jobs:
           signoff: false
           branch: feature/jargon-sync-${{ env.prefix }}
           delete-branch: true
-          title: 'chore: sync ${{ github.event.client_payload.domain.name }}data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}'
+          title: ${{ env.pr_title}}
           body: |
-            ${{ github.event.client_payload.snapshot.description }}
+            ${{ env.pr_body}}
           draft: false
           token: ${{ steps.get_workflow_token.outputs.token }}
