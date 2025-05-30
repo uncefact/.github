@@ -67,7 +67,7 @@ jobs:
           prs=$(gh pr list \
               --head 'feature/jargon-sync-${{ env.prefix }}' \
               --base 'data-models-staging' \
-              --json title,body')
+              --json title,body)
           #TODO: add a check that there is a single match or none
           pr_title=$(echo $prs | jq '.[].title')
           default_pr_title='chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}'
