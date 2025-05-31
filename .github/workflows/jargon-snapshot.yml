@@ -42,6 +42,12 @@ jobs:
         working-directory: "data-models/${{ env.prefix }}"
         run: '[ -d artefacts ] || mkdir artefacts'
 
+      - shell: bash
+        working-directory: "data-models/${{ env.prefix }}/"
+        env:
+          CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+        run: |
+          printf '%s\n' "$CLIENT_PAYLOAD" > client_payload.json
       - name: Download files
         working-directory: "data-models/${{ env.prefix }}/"
         shell: bash
@@ -69,10 +75,10 @@ jobs:
               --base 'data-models-staging' \
               --json title,body)
           #TODO: add a check that there is a single match or none
-          pr_title=$(echo $prs | jq '.[].title')
-          default_pr_title='chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}'
+          pr_title=$(echo $prs | jq -r '.[].title')
+          default_pr_title='chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon'
           pr_title=${pr_title:-$default_pr_title}
-          pr_body=$(echo $prs | jq '.[].body')
+          pr_body=$(echo $prs | jq -r '.[].body')
           
           echo "pr_title=$pr_title" >> "$GITHUB_ENV"
           echo "pr_body=$pr_body" >> "$GITHUB_ENV"
