@@ -73,8 +73,6 @@ jobs:
           default_pr_title='chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}'
           pr_title=${pr_title:-$default_pr_title}
           pr_body=$(echo $prs | jq '.[].body')
-          default_pr_body='${{ github.event.client_payload.snapshot.description }}'
-          pr_body="$pr_body\n$default_pr_body"         
           
           echo "pr_title=$pr_title" >> "$GITHUB_ENV"
           echo "pr_body=$pr_body" >> "$GITHUB_ENV"
@@ -92,5 +90,6 @@ jobs:
           title: ${{ env.pr_title}}
           body: |
             ${{ env.pr_body}}
+            ${{ github.event.client_payload.snapshot.description }}
           draft: false
           token: ${{ steps.get_workflow_token.outputs.token }}
