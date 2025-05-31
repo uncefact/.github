@@ -78,7 +78,7 @@ jobs:
           pr_title=$(echo $prs | jq -r '.[].title')
           default_pr_title='chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon'
           pr_title=${pr_title:-$default_pr_title}
-          pr_body=$(echo $prs | jq -r '.[].body')
+          pr_body=$(echo $prs | jq '.[].body')
           
           echo "pr_title=$pr_title" >> "$GITHUB_ENV"
           echo "pr_body=$pr_body" >> "$GITHUB_ENV"
