@@ -77,11 +77,12 @@ jobs:
           #TODO: add a check that there is a single match or none
           pr_title=$(echo $prs | jq -r '.[].title')
           default_pr_title='chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon'
-          pr_title=${pr_title:-$default_pr_title}
-          pr_body=$(echo $prs | jq '.[].body')
-          
+          pr_title=${pr_title:-$default_pr_title}          
           echo "pr_title=$pr_title" >> "$GITHUB_ENV"
-          echo "pr_body=$pr_body" >> "$GITHUB_ENV"
+
+          echo "pr_body<<EOF" >> $GITHUB_ENV
+          echo $prs | jq -r '.[].body' >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Create Pull Request
         id: cpr
