@@ -43,7 +43,7 @@ jobs:
         run: '[ -d artefacts ] || mkdir artefacts'
 
       - shell: bash
-        working-directory: "data-models/${{ env.prefix }}/"
+        working-directory: "data-models/"
         env:
           CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
         run: |
