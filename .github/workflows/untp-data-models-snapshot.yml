@@ -1,0 +1,146 @@
+name: Publish UNTP Data models snapshots
+
+on:
+  workflow_call:
+    
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: 'us-west-1'
+  # Setting an environment variable with the value of a configuration variable
+  utility_jar: vocab-jsonld-utility-1.6.5.jar
+  
+
+jobs:
+  define-matrix:
+    runs-on: ubuntu-latest
+
+    outputs:
+      data-models: ${{ steps.data-models-matrix.outputs.data-models }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: spec-untp/
+
+      - name: build data models matrix
+        working-directory: spec-untp/data-models
+        shell: bash
+        id: data-models-matrix
+        run: |
+          find . -maxdepth 1 -type d -not -path . | sed 's/^.\///' | jq -R . | jq -s -c . > data-models.json
+          cat data-models.json
+          echo data-models=$(cat data-models.json) >> "$GITHUB_OUTPUT"
+
+
+  publish-prerelease:
+    runs-on: ubuntu-latest
+    needs: define-matrix
+    strategy:
+      matrix:
+        data-model: ${{ fromJSON(needs.define-matrix.outputs.data-models) }}
+
+    env:  
+      data-model: ${{ matrix.data-model }}
+      utility_jar: vocab-jsonld-utility-1.6.5.jar
+      #domain_name: ${{ matrix.data-model }}
+      prefix: ${{ matrix.data-model }}
+      version: 'working'
+
+    steps: 
+    - name: Update ${{ matrix.data-model }} 
+      run: |
+        echo $data-model
+      
+    - uses: actions/checkout@v4
+      with:
+        path: spec-untp/
+
+    - name: Get Token
+      id: get_workflow_token
+      uses: peter-murray/workflow-application-token-action@v4
+      with:
+        application_id: ${{ secrets.APP_ID }}
+        application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+        permissions: "contents:write"
+
+    - name: checkout_vocabulary_outputs
+      uses: actions/checkout@v4
+      with:
+        repository: uncefact/vocabulary-outputs
+        ref: ${{ env.prefix }}-pages-${{ env.version }}
+        token: ${{ steps.get_workflow_token.outputs.token }}
+        fetch-depth: 1
+        path: vocabulary-outputs
+    - id: set-env
+      name: output a baseurl for the release
+      run: |
+        baseurl=$(echo "${{ env.prefix }}/${{ env.version }}/")
+        echo "artefacts_path=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
+        echo "baseurl=/vocabulary/$baseurl/$major_version" >> "$GITHUB_OUTPUT"
+    - name: Print the baseurl
+      run: |
+        echo "the baseurl is ${{ steps.set-env.outputs.baseurl }}"
+    - run: |
+        vocab_version=$(jq -r '."@context"."untp-core"' spec-untp/data-models/${{ env.prefix }}/vocabulary.jsonld | awk -F/ '{print $(NF-1))
+        context_version=$(jq -r '."@context"."untp-core"' spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld | awk -F/ '{print $(NF-1))
+        [[ "$vocab_version" == "${{ env.version }}" ]] && echo "Match!" || (echo "Error: vocab prefix doesn't match working version"
+        if [[ "$vocab_version" == "${{ env.version }}" && "$context_version" == "${{ env.version }}" ]]; then
+          cp spec-untp/data-models/${{ env.prefix }}/vocabulary.jsonld vocabulary-outputs/${{ env.prefix }}.jsonld
+          cp spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld vocabulary-outputs/${{ env.version }}-context.jsonld
+        else
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
+        fi
+      env:
+        GH_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
+  
+  
+    - id: download-md-utility
+      uses: robinraju/release-downloader@v1.12
+      with:
+        repository: "uncefact/utilities"
+        latest: true
+        fileName: "${{ env.utility_jar }}"
+        out-file-path: "vocabulary-outputs"
+        tarBall: false
+        zipBall: false
+        extract: false
+    - working-directory: vocabulary-outputs
+      run: |
+        ls -la .
+    - uses: actions/setup-java@v3
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+
+    - working-directory: vocabulary-outputs
+      run: |
+        cp _data/versions.json .
+        rm -rf _data/
+        rm -rf _properties/
+        rm -rf _classes/
+        rm -rf _code-lists/ 
+    - working-directory: vocabulary-outputs
+      run: |
+        java -jar ${{ env.utility_jar }} -m "md" -d "./" -i ${{ env.prefix }}.jsonld && cat out.md || \
+          (cat err.md && echo  "::error title=Failed to process ${{ env.prefix }}.jsonld::check logs for details" && exit 1)
+    - working-directory: vocabulary-outputs
+      run: mv versions.json _data/
+    - working-directory: vocabulary-outputs
+      run: |
+        rm ${{ env.utility_jar }}
+        rm batch-add.json || echo -e "skip"
+        rm batch-delete.json || echo -e "skip"
+    
+    - working-directory: vocabulary-outputs
+      name: update the domain branch
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        yq -i '.versions.${{ env.prefix }}="${{ env.version }}"' _config_preview.yml 
+
+        git add .          
+        git commit -m "Release ${{ env.version }}" || echo -e "nothing to commit" 
+        git push origin ${{ env.prefix }}-pages-${{ env.version }}
