@@ -63,7 +63,7 @@ jobs:
       with:
         application_id: ${{ secrets.APP_ID }}
         application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
-        permissions: "contents:write,actions:write"
+        permissions: "contents:write"
 
     - name: checkout_vocabulary_outputs
       uses: actions/checkout@v4
@@ -89,15 +89,14 @@ jobs:
           cp spec-untp/data-models/${{ env.prefix }}/vocabulary.jsonld vocabulary-outputs/${{ env.prefix }}.jsonld
           cp spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld vocabulary-outputs/${{ env.version }}-context.jsonld
         else
-          cd spec-untp/
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
+          echo "skip_data_model=true" >> "$GITHUB_ENV"
         fi
       env:
         GH_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
   
   
     - id: download-md-utility
+      if: ${{ !env.skip_data_model }}
       uses: robinraju/release-downloader@v1.12
       with:
         repository: "uncefact/utilities"
@@ -108,14 +107,17 @@ jobs:
         zipBall: false
         extract: false
     - working-directory: vocabulary-outputs
+      if: ${{ !env.skip_data_model }}
       run: |
         ls -la .
     - uses: actions/setup-java@v3
+      if: ${{ !env.skip_data_model }}
       with:
         distribution: 'adopt'
         java-version: '11'
 
     - working-directory: vocabulary-outputs
+      if: ${{ !env.skip_data_model }}
       run: |
         cp _data/versions.json .
         rm -rf _data/
@@ -123,18 +125,20 @@ jobs:
         rm -rf _classes/
         rm -rf _code-lists/ 
     - working-directory: vocabulary-outputs
+      if: ${{ !env.skip_data_model }}
       run: |
         java -jar ${{ env.utility_jar }} -m "md" -d "./" -i ${{ env.prefix }}.jsonld && cat out.md || \
           (cat err.md && echo  "::error title=Failed to process ${{ env.prefix }}.jsonld::check logs for details" && exit 1)
     - working-directory: vocabulary-outputs
-      run: mv versions.json _data/
-    - working-directory: vocabulary-outputs
+      if: ${{ !env.skip_data_model }}
       run: |
+        mv versions.json _data/
         rm ${{ env.utility_jar }}
         rm batch-add.json || echo -e "skip"
         rm batch-delete.json || echo -e "skip"
     
     - working-directory: vocabulary-outputs
+      if: ${{ !env.skip_data_model }}
       name: update the domain branch
       run: |
         git config --global user.name "github-actions[bot]"
