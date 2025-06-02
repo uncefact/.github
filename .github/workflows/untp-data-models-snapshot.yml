@@ -63,7 +63,7 @@ jobs:
       with:
         application_id: ${{ secrets.APP_ID }}
         application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
-        permissions: "contents:write"
+        permissions: "contents:write,actions:write"
 
     - name: checkout_vocabulary_outputs
       uses: actions/checkout@v4
