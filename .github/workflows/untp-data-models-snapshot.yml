@@ -78,7 +78,7 @@ jobs:
       run: |
         baseurl=$(echo "${{ env.prefix }}/${{ env.version }}" | sed -r 's/[-]+/\//g')
         echo "artefacts_path=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
-        echo "baseurl=/vocabulary/$baseurl/" >> "$GITHUB_OUTPUT"
+        echo "baseurl=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
     - name: Print the baseurl
       run: |
         echo "the baseurl is ${{ steps.set-env.outputs.baseurl }}"
