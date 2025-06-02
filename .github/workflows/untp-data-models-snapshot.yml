@@ -4,8 +4,8 @@ on:
   workflow_call:
     
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: 'us-west-1'
   # Setting an environment variable with the value of a configuration variable
   utility_jar: vocab-jsonld-utility-1.6.5.jar
@@ -76,9 +76,9 @@ jobs:
     - id: set-env
       name: output a baseurl for the release
       run: |
-        baseurl=$(echo "${{ env.prefix }}/${{ env.version }}/")
+        baseurl=$(echo "${{ env.prefix }}/${{ env.version }}/" | sed -r 's/[-]+/\//g')
         echo "artefacts_path=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
-        echo "baseurl=/vocabulary/$baseurl/$major_version" >> "$GITHUB_OUTPUT"
+        echo "baseurl=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
     - name: Print the baseurl
       run: |
         echo "the baseurl is ${{ steps.set-env.outputs.baseurl }}"
@@ -147,5 +147,25 @@ jobs:
         yq -i '.versions.${{ env.prefix }}="${{ env.version }}"' _config_preview.yml 
         git checkout -b ${{ env.prefix }}-pages-${{ env.version }}
         git add .          
-        git commit -m "Release ${{ env.version }}" || echo -e "nothing to commit" 
+        git commit -m "Update working version" || echo -e "nothing to commit" 
         git push origin ${{ env.prefix }}-pages-${{ env.version }}
+
+        yq -i '.baseurl="${{ steps.set-env.outputs.baseurl }}"' _config_preview.yml 
+
+    - name: Set up Ruby
+      if: ${{ !env.skip_data_model }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "2.6.5" # Not needed with a .ruby-version file
+    - name: "Bundle install"
+      if: ${{ !env.skip_data_model }}
+      run: bundle install
+    - name: "Build Site"
+      if: ${{ !env.skip_data_model }}
+      run: bundle exec jekyll build --config _config_preview.yml
+    - name: "Deploy to AWS S3"
+      if: ${{ !env.skip_data_model }}
+      run: |
+        echo "aws s3 sync ./_artefacts/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.artefacts_path }} --cache-control max-age=604800"
+        echo "aws s3 sync ./_site/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.baseurl }} --delete --cache-control max-age=604800"
+        #aws cloudfront create-invalidation --distribution-id "E32QP2QS6SXRHC" --paths "${{ steps.set-env.outputs.artefacts_path }}/*"
