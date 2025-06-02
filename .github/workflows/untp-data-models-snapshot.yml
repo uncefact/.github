@@ -68,7 +68,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: uncefact/vocabulary-outputs
-        ref: ${{ env.prefix }}-pages-${{ env.version }}
+        ref: ${{ env.prefix }}-pages
         token: ${{ steps.get_workflow_token.outputs.token }}
         fetch-depth: 1
         path: vocabulary-outputs
@@ -140,7 +140,7 @@ jobs:
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
         yq -i '.versions.${{ env.prefix }}="${{ env.version }}"' _config_preview.yml 
-
+        git checkout -b ${{ env.prefix }}-pages-${{ env.version }}
         git add .          
         git commit -m "Release ${{ env.version }}" || echo -e "nothing to commit" 
         git push origin ${{ env.prefix }}-pages-${{ env.version }}
