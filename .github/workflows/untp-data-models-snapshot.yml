@@ -76,9 +76,9 @@ jobs:
     - id: set-env
       name: output a baseurl for the release
       run: |
-        baseurl=$(echo "${{ env.prefix }}/${{ env.version }}/" | sed -r 's/[-]+/\//g')
+        baseurl=$(echo "${{ env.prefix }}/${{ env.version }}" | sed -r 's/[-]+/\//g')
         echo "artefacts_path=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
-        echo "baseurl=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
+        echo "baseurl=/vocabulary/$baseurl/" >> "$GITHUB_OUTPUT"
     - name: Print the baseurl
       run: |
         echo "the baseurl is ${{ steps.set-env.outputs.baseurl }}"
@@ -169,6 +169,6 @@ jobs:
       working-directory: vocabulary-outputs
       if: ${{ !env.skip_data_model }}
       run: |
-        echo "aws s3 sync ./_artefacts/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.artefacts_path }} --cache-control max-age=604800"
-        echo "aws s3 sync ./_site/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.baseurl }} --delete --cache-control max-age=604800"
-        #aws cloudfront create-invalidation --distribution-id "E32QP2QS6SXRHC" --paths "${{ steps.set-env.outputs.artefacts_path }}/*"
+        aws s3 sync ./_artefacts/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.artefacts_path }} --cache-control max-age=604800"
+        aws s3 sync ./_site/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.baseurl }} --delete --cache-control max-age=604800"
+        aws cloudfront create-invalidation --distribution-id "E32QP2QS6SXRHC" --paths "${{ steps.set-env.outputs.artefacts_path }}*"
