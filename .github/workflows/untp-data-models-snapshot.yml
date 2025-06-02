@@ -158,12 +158,15 @@ jobs:
       with:
         ruby-version: "2.6.5" # Not needed with a .ruby-version file
     - name: "Bundle install"
+      working-directory: vocabulary-outputs
       if: ${{ !env.skip_data_model }}
       run: bundle install
     - name: "Build Site"
+      working-directory: vocabulary-outputs
       if: ${{ !env.skip_data_model }}
       run: bundle exec jekyll build --config _config_preview.yml
     - name: "Deploy to AWS S3"
+      working-directory: vocabulary-outputs
       if: ${{ !env.skip_data_model }}
       run: |
         echo "aws s3 sync ./_artefacts/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.artefacts_path }} --cache-control max-age=604800"
