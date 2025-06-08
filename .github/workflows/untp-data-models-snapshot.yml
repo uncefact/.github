@@ -87,6 +87,7 @@ jobs:
         context_version=$(jq -r '."@context"."${{ env.prefix }}"' spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld | awk -F/ '{print $(NF-1)}')
         if [[ "$vocab_version" == "${{ env.version }}" && "$context_version" == "${{ env.version }}" ]]; then
           cp spec-untp/data-models/${{ env.prefix }}/vocabulary.jsonld vocabulary-outputs/${{ env.prefix }}.jsonld
+          cp spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld vocabulary-outputs/${{ env.prefix }}-context-${{ env.version}}.jsonld
           find ./spec-untp/data-models/${{ env.prefix }}/artefacts/ -name \*-instance.json -exec cp {} ./vocabulary-outputs/_artefacts \;
           find ./spec-untp/data-models/${{ env.prefix }}/artefacts/ -name \*-schema.json -exec cp {} ./vocabulary-outputs/_artefacts \;
         else
