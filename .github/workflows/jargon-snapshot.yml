@@ -56,19 +56,13 @@ jobs:
           wget -O artefacts/context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}
           
           count1=0
-          for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq '.[].url'); do
+          for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[].url'); do
             echo "$schema_url"
             filename=${schema_url#*=}
-            if [ $count1 -eq 0 ]; then
-                filename="${{ env.prefix}}-schema"
-            elif [ $count1 -eq 1 ]; then
-                filename="${{ env.prefix}}-instance"
+            if [[ "$filename" =~ .*_instance$ ]]; then
+                filename=${filename//_/-}
             else
-                if [[ "$filename" =~ .*_instance$ ]]; then
-                    filename=${filename//_/-}
-                else
-                    filename="$filename-schema"
-                fi
+                filename="$filename-schema"
             fi
             wget -O artefacts/${filename}.json $(echo "$schema_url" | sed 's/^"\|"$//g')
             ((count1++))
