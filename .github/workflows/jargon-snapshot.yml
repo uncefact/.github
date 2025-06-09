@@ -70,7 +70,7 @@ jobs:
                     filename="$filename-schema"
                 fi
             fi
-            wget -O artefacts/${filename}.json ${schema_url}
+            wget -O artefacts/${filename}.json $(echo "$schema_url" | sed 's/^"\|"$//g')
             ((count++))
           done
 
