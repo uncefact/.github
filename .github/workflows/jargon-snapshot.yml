@@ -69,6 +69,7 @@ jobs:
                     filename="$filename-schema"
                 fi
             fi
+            echo "wget -O artefacts/${filename}.json ${schema_url}"
             wget -O artefacts/${filename}.json ${schema_url}
             ((count++))
           done
