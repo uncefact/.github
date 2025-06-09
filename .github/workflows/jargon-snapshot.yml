@@ -54,15 +54,23 @@ jobs:
         run: |
           wget -O vocabulary.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}
           wget -O artefacts/context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}
-
+          
+          count=0
           for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[].url'); do
             filename=${schema_url#*=}
-            if [[ "$filename" =~ .*_instance$ ]]; then
-                filename=${filename//_/-}
+            if [ $count -eq 0 ]; then
+                filename="${{ env.prefix}}-schema"
+            elif [ $count -eq 1 ]; then
+                filename="${{ env.prefix}}-instance"
             else
-                filename="$filename-schema"
+                if [[ "$filename" =~ .*_instance$ ]]; then
+                    filename=${filename//_/-}
+                else
+                    filename="$filename-schema"
+                fi
             fi
             wget -O artefacts/${filename}.json ${schema_url}
+            ((count++))
           done
 
       - name: Prepare PR title and body
