@@ -134,7 +134,7 @@ jobs:
     - working-directory: vocabulary-outputs
       if: ${{ !env.skip_data_model }}
       run: |
-        jq '.majors[] | select (.major == 0) | .log += [{"version": "${{env.version}}", "date": "2025-06-09", "notes": "${{env.version}}", "context": "${{env.version}}/context/", "schema": "${{env.prefix}}-schema-${{env.version}}.json", "instance": "${{env.prefix}}-instance-${{env.version}}.json"}]' versions.json > _data/versions.json
+        jq '.| .majors[] | select (.major == 0) | .log += [{"version": "${{env.version}}", "date": "2025-06-09", "notes": "${{env.version}}", "context": "${{env.version}}/context/", "schema": "${{env.prefix}}-schema-${{env.version}}.json", "instance": "${{env.prefix}}-instance-${{env.version}}.json"}]' versions.json > _data/versions.json
         rm versions.json
         rm ${{ env.utility_jar }}
         rm batch-add.json || echo -e "skip"
