@@ -89,6 +89,7 @@ jobs:
           cp spec-untp/data-models/${{ env.prefix }}/vocabulary.jsonld vocabulary-outputs/${{ env.prefix }}.jsonld
           cp spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld vocabulary-outputs/${{ env.prefix }}-context-${{ env.version}}.jsonld
           cd spec-untp/data-models/${{ env.prefix }}/artefacts/
+          shopt -s nullglob
           for f in *.json; do cp "$f" "../../../../vocabulary-outputs/_artefacts/${f%.json}-working.json"; done
         else
           echo "skip_data_model=true" >> "$GITHUB_ENV"
