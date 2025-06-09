@@ -88,8 +88,8 @@ jobs:
         if [[ "$vocab_version" == "${{ env.version }}" && "$context_version" == "${{ env.version }}" ]]; then
           cp spec-untp/data-models/${{ env.prefix }}/vocabulary.jsonld vocabulary-outputs/${{ env.prefix }}.jsonld
           cp spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld vocabulary-outputs/${{ env.prefix }}-context-${{ env.version}}.jsonld
-          find ./spec-untp/data-models/${{ env.prefix }}/artefacts/ -name \*-instance.json -exec cp {} ./vocabulary-outputs/_artefacts \;
-          find ./spec-untp/data-models/${{ env.prefix }}/artefacts/ -name \*-schema.json -exec cp {} ./vocabulary-outputs/_artefacts \;
+          cd spec-untp/data-models/${{ env.prefix }}/artefacts/
+          for f in *.json; do cp "$f" "../../../../vocabulary-outputs/_artefacts/${f%.json}-working.json"; done
         else
           echo "skip_data_model=true" >> "$GITHUB_ENV"
         fi
@@ -134,7 +134,8 @@ jobs:
     - working-directory: vocabulary-outputs
       if: ${{ !env.skip_data_model }}
       run: |
-        mv versions.json _data/
+        jq '.majors[] | select (.major == 0) | .log += [{"version": "${{env.version}}", "date": "2025-06-09", "notes": "${{env.version}}", "context": "${{env.version}}/context/", "schema": "${{env.prefix}}-schema-${{env.version}}.json", "instance": "${{env.prefix}}-instance-${{env.version}}.json"}]' versions.json > _data/versions.json
+        rm versions.json
         rm ${{ env.utility_jar }}
         rm batch-add.json || echo -e "skip"
         rm batch-delete.json || echo -e "skip"
