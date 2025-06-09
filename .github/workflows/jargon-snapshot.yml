@@ -55,8 +55,8 @@ jobs:
           wget -O vocabulary.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}
           wget -O artefacts/context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}
           
-          domain_schema = $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[0].url')
-          domain_instance = $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[1].url')
+          domain_schema=$(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[0].url')
+          domain_instance=$(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[1].url')
           
           for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[].url'); do
             if [[ "$domain_schema" == "$schema_url" ]]; then
