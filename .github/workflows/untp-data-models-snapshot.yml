@@ -148,7 +148,6 @@ jobs:
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
         yq -i '.versions.${{ env.prefix }}="${{ env.version }}"' _config_preview.yml 
-        git checkout -b ${{ env.prefix }}-pages-${{ env.version }}
         git add .          
         git commit -m "Update working version" || echo -e "nothing to commit" 
         git push origin ${{ env.prefix }}-pages-${{ env.version }}
