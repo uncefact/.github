@@ -90,7 +90,7 @@ jobs:
           cp spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld vocabulary-outputs/${{ env.prefix }}-context-${{ env.version}}.jsonld
           cd spec-untp/data-models/${{ env.prefix }}/artefacts/
           shopt -s nullglob
-          for f in *.json; do cp "$f" "../../../../vocabulary-outputs/_artefacts/${f%.json}-working.json"; done
+          for f in *.json; do cp "$f" "../../../../vocabulary-outputs/_artefacts/${f%.json}-${{ env.version }}.json"; done
         else
           echo "skip_data_model=true" >> "$GITHUB_ENV"
         fi
@@ -153,6 +153,7 @@ jobs:
         git commit -m "Update working version" || echo -e "nothing to commit" 
         git push origin ${{ env.prefix }}-pages-${{ env.version }}
 
+        cp _artefacts/* .
         yq -i '.baseurl="${{ steps.set-env.outputs.baseurl }}"' _config_preview.yml 
 
     - name: Set up Ruby
