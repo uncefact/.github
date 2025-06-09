@@ -55,13 +55,21 @@ jobs:
           wget -O vocabulary.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}
           wget -O artefacts/context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}
           
+          domain_schema = $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[0].url')
+          domain_instance = $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[1].url')
+          
           for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[].url'); do
-            echo "$schema_url"
-            filename=${schema_url#*=}
-            if [[ "$filename" =~ .*_instance$ ]]; then
-                filename=${filename//_/-}
+            if [[ "$domain_schema" == "$schema_url" ]]; then
+                filename="${{env.prefix }}-schema"
+            elif [[ "$domain_instance" == "$schema_url" ]]; then
+                filename="${{env.prefix }}-instance"
             else
-                filename="$filename-schema"
+              filename=${schema_url#*=}
+              if [[ "$filename" =~ .*_instance$ ]]; then
+                  filename=${filename//_/-}
+              else
+                  filename="$filename-schema"
+              fi
             fi
             wget -O artefacts/${filename}.json $(echo "$schema_url" | sed 's/^"\|"$//g')
           done
