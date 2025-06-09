@@ -58,6 +58,7 @@ jobs:
           count=0
           for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[].url'); do
             filename=${schema_url#*=}
+            echo "$filename"
             if [ $count -eq 0 ]; then
                 filename="${{ env.prefix}}-schema"
             elif [ $count -eq 1 ]; then
@@ -69,7 +70,6 @@ jobs:
                     filename="$filename-schema"
                 fi
             fi
-            echo "wget -O artefacts/${filename}.json ${schema_url}"
             wget -O artefacts/${filename}.json ${schema_url}
             ((count++))
           done
