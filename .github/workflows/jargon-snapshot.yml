@@ -55,7 +55,6 @@ jobs:
           wget -O vocabulary.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}
           wget -O artefacts/context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}
           
-          count1=0
           for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[].url'); do
             echo "$schema_url"
             filename=${schema_url#*=}
@@ -65,7 +64,6 @@ jobs:
                 filename="$filename-schema"
             fi
             wget -O artefacts/${filename}.json $(echo "$schema_url" | sed 's/^"\|"$//g')
-            ((count1++))
           done
 
       - name: Prepare PR title and body
