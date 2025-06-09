@@ -56,7 +56,7 @@ jobs:
           wget -O artefacts/context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}
           
           count=0
-          for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[].url'); do
+          for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq '.[].url'); do
             echo "$schema_url"
             filename=${schema_url#*=}
             if [ $count -eq 0 ]; then
