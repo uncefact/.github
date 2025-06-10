@@ -52,7 +52,7 @@ jobs:
       - name: Upload client payload
         uses: actions/upload-artifact@v4
         with:
-          name: client-payload
+          name: client-payload-${{ env.prefix }}
           path: data-models/client_payload.json
           
       - name: Download files
