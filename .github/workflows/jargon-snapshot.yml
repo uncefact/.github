@@ -48,6 +48,13 @@ jobs:
           CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
         run: |
           printf '%s\n' "$CLIENT_PAYLOAD" > client_payload.json
+
+      - name: Upload client payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-payload
+          path: data-models/client_payload.json
+          
       - name: Download files
         working-directory: "data-models/${{ env.prefix }}/"
         shell: bash
