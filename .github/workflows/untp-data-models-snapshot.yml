@@ -136,8 +136,8 @@ jobs:
       if: ${{ !env.skip_data_model }}
       run: |
         jq --arg version_date "$(date +'%Y-%m-%d')" \
-          --arg schemas $(find ./_artefacts -maxdepth 1 -name "*schema-${{env.version}}.json" -printf '%f\n' | jq -R -c -s 'split("\n")[:-1]') \
-          --arg instances $(find ./_artefacts -maxdepth 1 -name "*-instance-${{env.version}}.json" -printf '%f\n' | jq -R -c -s 'split("\n")[:-1]') \
+          --argjson schemas $(find ./_artefacts -maxdepth 1 -name "*schema-${{env.version}}.json" -printf '%f\n' | jq -R -c -s 'split("\n")[:-1]') \
+          --argjson instances $(find ./_artefacts -maxdepth 1 -name "*-instance-${{env.version}}.json" -printf '%f\n' | jq -R -c -s 'split("\n")[:-1]') \
           '(.majors[] | select (.major == 0).log) |= [{"version": "${{env.version}}", "date": $version_date, "notes": "${{env.version}}", "context": "${{env.version}}/context/", "schemas": $schemas, "instances": $instances}] + .' versions.json > _data/versions.json
         rm versions.json
         rm ${{ env.utility_jar }}
