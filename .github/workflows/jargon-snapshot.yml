@@ -55,6 +55,11 @@ jobs:
           name: client-payload-${{ env.prefix }}
           path: data-models/client_payload.json
           
+      - name: Cleanup client payload
+        working-directory: "data-models/"
+        run: |
+          rm client_payload.json
+
       - name: Download files
         working-directory: "data-models/${{ env.prefix }}/"
         shell: bash
