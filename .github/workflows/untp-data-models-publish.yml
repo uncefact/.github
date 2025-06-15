@@ -209,6 +209,6 @@ jobs:
       working-directory: vocabulary-outputs
       if: ${{ !env.skip_data_model && !inputs.dry-run}}
       run: |
-        aws s3 sync ./_artefacts/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.artefacts_path }} --cache-control max-age=604800
-        aws s3 sync ./_site/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.baseurl }} --delete --cache-control max-age=604800
-        aws cloudfront create-invalidation --distribution-id "E32QP2QS6SXRHC" --paths "${{ steps.set-env.outputs.artefacts_path }}*"
+        #aws s3 sync ./_artefacts/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.artefacts_path }} --cache-control max-age=604800
+        #aws s3 sync ./_site/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.baseurl }} --delete --cache-control max-age=604800
+        #aws cloudfront create-invalidation --distribution-id "E32QP2QS6SXRHC" --paths "${{ steps.set-env.outputs.artefacts_path }}*"
