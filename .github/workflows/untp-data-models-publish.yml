@@ -88,15 +88,21 @@ jobs:
       name: output a baseurl for the release
       run: |
         baseurl=$(echo "${{ env.prefix }}/${{ env.version }}" | sed -r 's/[-]+/\//g')
+        if [[ "${{ env.version}}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          major_version=$(echo "${{ env.version }}" | sed 's/^v\([0-9]*\)\..*/\1/')
+        else
+          major_version="${{ env.version}}"
+        fi
         echo "artefacts_path=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
-        echo "baseurl=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
+        echo "major_version=$major_version" >> "$GITHUB_OUTPUT"
+        echo "baseurl=/vocabulary/$baseurl/$major_version" >> "$GITHUB_OUTPUT"
     - name: Print the baseurl
       run: |
         echo "the baseurl is ${{ steps.set-env.outputs.baseurl }}"
     - run: |
         vocab_version=$(jq -r '."@context"."${{ env.prefix }}"' spec-untp/data-models/${{ env.prefix }}/vocabulary.jsonld | awk -F/ '{print $(NF-1)}')
         context_version=$(jq -r '."@context"."${{ env.prefix }}"' spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld | awk -F/ '{print $(NF-1)}')
-        if [[ "$vocab_version" == "${{ env.version }}" && "$context_version" == "${{ env.version }}" ]]; then
+        if [[ "$vocab_version" == "${{ steps.set-env.outputs.major_version }}" && "$context_version" == "${{ steps.set-env.outputs.major_version }}" ]]; then
           cp spec-untp/data-models/${{ env.prefix }}/vocabulary.jsonld vocabulary-outputs/${{ env.prefix }}.jsonld
           cp spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld vocabulary-outputs/${{ env.prefix }}-context-${{ env.version}}.jsonld
           cd spec-untp/data-models/${{ env.prefix }}/artefacts/
