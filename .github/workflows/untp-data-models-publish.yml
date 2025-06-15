@@ -117,7 +117,12 @@ jobs:
           shopt -s nullglob
           for f in *.json; do cp "$f" "../../../../vocabulary-outputs/_artefacts/${f%.json}-${{ env.version }}.json"; done
         else
-          echo "skip_data_model=true" >> "$GITHUB_ENV"
+          if [[ "working" == "${{ env.version}} "]]; then
+            echo "Skipping data model due to version mismatch - only working versions are to be published"
+            echo "skip_data_model=true" >> "$GITHUB_ENV"
+          else
+            echo "Error: Version in vocabulary or context doesn't match expected value - $major_version" && exit 1
+          fi
         fi
       env:
         GH_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
