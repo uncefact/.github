@@ -1,0 +1,123 @@
+name: jargon_onSnapshot
+
+on:
+  workflow_call:
+    
+env:
+  # Setting an environment variable with the value of a configuration variable
+  domain_name: ${{ github.event.client_payload.domain.name }}
+  prefix: ${{ github.event.client_payload.settings.jsonld.prefix }}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Get Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v4
+        with:
+          application_id: ${{ secrets.APP_ID }}
+          application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+      - uses: actions/checkout@v4
+        with:
+          ref: data-models-staging
+          token: ${{ steps.get_workflow_token.outputs.token }}
+      - run: 'echo "Domain name: ${{ env.domain_name }}"'
+      - run: 'echo "client_payload: ${{ github.event.client_payload }}"'
+
+      - name: Check if settings.jsonld.prefix is not blank
+        run: '[ "${{ env.prefix }}" = "" ] && exit 1 || exit 0'
+      
+      - name: Check if ${{ env.prefix }} directory exists
+        working-directory: "data-models/"
+        run: '[ -d ${{ env.prefix }} ] || mkdir ${{ env.prefix }}'
+      
+      - name: Check if ${{ env.prefix }}/artefacts directory exists
+        working-directory: "data-models/${{ env.prefix }}"
+        run: '[ -d artefacts ] || mkdir artefacts'
+
+      - shell: bash
+        working-directory: "data-models/"
+        env:
+          CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+        run: |
+          printf '%s\n' "$CLIENT_PAYLOAD" > client_payload.json
+
+      - name: Upload client payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-payload-${{ env.prefix }}
+          path: data-models/client_payload.json
+          
+      - name: Cleanup client payload
+        working-directory: "data-models/"
+        run: |
+          rm client_payload.json
+
+      - name: Download files
+        working-directory: "data-models/${{ env.prefix }}/"
+        shell: bash
+        run: |
+          wget -O vocabulary.jsonld ${{ github.event.client_payload.artefacts.jsonldVocab.url }}
+          wget -O artefacts/context.jsonld ${{ github.event.client_payload.artefacts.jsonldContext.url }}
+          
+          domain_schema=$(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[0].url')
+          domain_instance=$(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[1].url')
+          
+          for schema_url in $(echo '${{ toJson(github.event.client_payload.artefacts.jsonSchemas) }}' | jq -r '.[].url'); do
+            if [[ "$domain_schema" == "$schema_url" ]]; then
+                filename="${{env.prefix }}-schema"
+            elif [[ "$domain_instance" == "$schema_url" ]]; then
+                filename="${{env.prefix }}-instance"
+            else
+              filename=${schema_url#*=}
+              if [[ "$filename" =~ .*_instance$ ]]; then
+                  filename=${filename//_/-}
+              else
+                  filename="$filename-schema"
+              fi
+            fi
+            wget -O artefacts/${filename}.json $(echo "$schema_url" | sed 's/^"\|"$//g')
+          done
+
+      - name: Prepare PR title and body
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
+        run: |
+          prs=$(gh pr list \
+              --head 'feature/jargon-sync-${{ env.prefix }}' \
+              --base 'data-models-staging' \
+              --json title,body)
+          #TODO: add a check that there is a single match or none
+          pr_title=$(echo $prs | jq -r '.[].title')
+          default_pr_title='chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon'
+          pr_title=${pr_title:-$default_pr_title}          
+          echo "pr_title=$pr_title" >> "$GITHUB_ENV"
+
+          echo "pr_body<<EOF" >> $GITHUB_ENV
+          echo $prs | jq -r '.[].body' >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: 'chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}'
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          signoff: false
+          branch: feature/jargon-sync-${{ env.prefix }}
+          delete-branch: true
+          title: ${{ env.pr_title}}
+          body: |
+            ${{ env.pr_body}}
+            ${{ github.event.client_payload.snapshot.description }}
+          draft: false
+          token: ${{ steps.get_workflow_token.outputs.token }}
