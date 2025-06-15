@@ -97,10 +97,11 @@ jobs:
           if [[ "$major_version" != "${{ inputs.major-version}}" ]]; then
             echo -e "Error: major version mismatch, update input major versio" && exit 1 
           fi
+          echo "artefacts_path=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
         else
           major_version="${{ env.version}}"
+          echo "artefacts_path=/vocabulary/$baseurl/major_version" >> "$GITHUB_OUTPUT"
         fi
-        echo "artefacts_path=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
         echo "major_version=$major_version" >> "$GITHUB_OUTPUT"
         echo "baseurl=/vocabulary/$baseurl/$major_version" >> "$GITHUB_OUTPUT"
     - name: Print the baseurl
