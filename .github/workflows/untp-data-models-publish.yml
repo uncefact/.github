@@ -121,7 +121,7 @@ jobs:
             echo "Skipping data model due to version mismatch - only working versions are to be published"
             echo "skip_data_model=true" >> "$GITHUB_ENV"
           else
-            echo "Error: Version in vocabulary or context doesn't match expected value - $major_version" && exit 1
+            echo "Error: Version in vocabulary or context doesn't match expected value - ${{ steps.set-env.outputs.major_version }}" && exit 1
           fi
         fi
       env:
@@ -209,6 +209,6 @@ jobs:
       working-directory: vocabulary-outputs
       if: ${{ !env.skip_data_model && !inputs.dry-run}}
       run: |
-        #aws s3 sync ./_artefacts/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.artefacts_path }} --cache-control max-age=604800
-        #aws s3 sync ./_site/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.baseurl }} --delete --cache-control max-age=604800
-        #aws cloudfront create-invalidation --distribution-id "E32QP2QS6SXRHC" --paths "${{ steps.set-env.outputs.artefacts_path }}*"
+        aws s3 sync ./_artefacts/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.artefacts_path }} --cache-control max-age=604800
+        aws s3 sync ./_site/ s3://uncefact-vocab-preview-sam-bucket-private${{ steps.set-env.outputs.baseurl }} --delete --cache-control max-age=604800
+        aws cloudfront create-invalidation --distribution-id "E32QP2QS6SXRHC" --paths "${{ steps.set-env.outputs.artefacts_path }}*"
