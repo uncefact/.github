@@ -100,7 +100,7 @@ jobs:
           echo "artefacts_path=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
         else
           major_version="${{ env.version}}"
-          echo "artefacts_path=/vocabulary/$baseurl/major_version" >> "$GITHUB_OUTPUT"
+          echo "artefacts_path=/vocabulary/$baseurl/$major_version" >> "$GITHUB_OUTPUT"
         fi
         echo "major_version=$major_version" >> "$GITHUB_OUTPUT"
         echo "baseurl=/vocabulary/$baseurl/$major_version" >> "$GITHUB_OUTPUT"
