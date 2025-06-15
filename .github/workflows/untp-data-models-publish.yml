@@ -1,7 +1,14 @@
-name: Publish UNTP Data models snapshots
+name: Publish UNTP Data models
 
 on:
   workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      comment:
+        required: true
+        type: string
     
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -33,7 +40,7 @@ jobs:
           echo data-models=$(cat data-models.json) >> "$GITHUB_OUTPUT"
 
 
-  publish-prerelease:
+  publish-data-models:
     runs-on: ubuntu-latest
     needs: define-matrix
     strategy:
@@ -46,7 +53,7 @@ jobs:
       utility_jar: vocab-jsonld-utility-1.6.5.jar
       #domain_name: ${{ matrix.data-model }}
       prefix: ${{ matrix.data-model }}
-      version: 'working'
+      version: ${{ inputs.version }}
 
     steps: 
     - name: Update ${{ matrix.data-model }} 
@@ -156,7 +163,7 @@ jobs:
 
         yq -i '.versions.${{ env.prefix }}="${{ env.version }}"' _config_preview.yml 
         git add .          
-        git commit -m "Update working version" || echo -e "nothing to commit" 
+        git commit -m "${{ inputs.comment }}" || echo -e "nothing to commit" 
         git push origin ${{ env.prefix }}-pages-${{ env.version }}
 
         cp _artefacts/* .
