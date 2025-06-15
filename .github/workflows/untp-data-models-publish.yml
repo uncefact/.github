@@ -117,7 +117,7 @@ jobs:
           shopt -s nullglob
           for f in *.json; do cp "$f" "../../../../vocabulary-outputs/_artefacts/${f%.json}-${{ env.version }}.json"; done
         else
-          if [[ "working" == "${{ env.version}} "]]; then
+          if [[ "working" == "${{ env.version}}" ]]; then
             echo "Skipping data model due to version mismatch - only working versions are to be published"
             echo "skip_data_model=true" >> "$GITHUB_ENV"
           else
