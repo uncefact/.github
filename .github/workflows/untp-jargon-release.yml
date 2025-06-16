@@ -36,15 +36,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
         run: |
-          gh api repos/{owner}/{repo}/branches/feature/jargon-sync-${{ env.version }} >/dev/null 2>&1 && echo "release_branch=true" >> "$GITHUB_OUTPUT" || echo "Branch does not exist" 
+          gh api repos/{owner}/{repo}/branches/feature/jargon-sync-${{ env.version }} >/dev/null 2>&1 \
+            && git checkout feature/jargon-sync-${{ env.version }} \ 
+            || git checkout -b feature/jargon-sync-${{ env.version }} 
 
-      - uses: actions/checkout@v4
-        if: steps.checkout_release_branch.outputs.release_branch
-        with:
-          ref: feature/jargon-sync-${{ env.version }}
-          token: ${{ steps.get_workflow_token.outputs.token }}
-      
-      
       - run: 'echo "Domain name: ${{ env.domain_name }}"'
       - run: 'echo "client_payload: ${{ github.event.client_payload }}"'
 
