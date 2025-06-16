@@ -115,7 +115,7 @@ jobs:
         context_version=$(jq -r '."@context"."${{ env.prefix }}"' spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld | awk -F/ '{print $(NF-1)}')
         if [[ "$vocab_version" == "${{ steps.set-env.outputs.major_version }}" && "$context_version" == "${{ steps.set-env.outputs.major_version }}" ]]; then
           cp spec-untp/data-models/${{ env.prefix }}/vocabulary.jsonld vocabulary-outputs/${{ env.prefix }}.jsonld
-          cp spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld vocabulary-outputs/${{ env.prefix }}-context-${{ steps.set-env.outputs.version_postfix }}.jsonld
+          cp spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld vocabulary-outputs/_artefacts/${{ env.prefix }}-context-${{ steps.set-env.outputs.version_postfix }}.jsonld
           cd spec-untp/data-models/${{ env.prefix }}/artefacts/
           shopt -s nullglob
           for f in *.json; do cp "$f" "../../../../vocabulary-outputs/_artefacts/${f%.json}-${{ steps.set-env.outputs.version_postfix }}.json"; done
