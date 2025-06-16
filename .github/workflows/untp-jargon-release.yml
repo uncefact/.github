@@ -31,6 +31,20 @@ jobs:
           ref: data-models-staging
           token: ${{ steps.get_workflow_token.outputs.token }}
       
+      - name: Check if release branch already exists
+        id: checkout_release_branch
+        env:
+          GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
+        run: |
+          gh api repos/{owner}/{repo}/branches/feature/jargon-sync-${{ env.version }} >/dev/null 2>&1 && echo "release_branch=true" >> "$GITHUB_OUTPUT" || echo "Branch does not exist" 
+
+      - uses: actions/checkout@v4
+        if: steps.checkout_release_branch.outputs.release_branch
+        with:
+          ref: feature/jargon-sync-${{ env.version }}
+          token: ${{ steps.get_workflow_token.outputs.token }}
+      
+      
       - run: 'echo "Domain name: ${{ env.domain_name }}"'
       - run: 'echo "client_payload: ${{ github.event.client_payload }}"'
 
