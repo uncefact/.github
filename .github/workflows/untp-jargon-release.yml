@@ -118,9 +118,10 @@ jobs:
             pr_title='feat: update data models with Jargon release ${{ env.version }}'
             gh pr create --title "$pr_title" --base data-models-staging --body "update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}"
           else
+          current_pr_body=$(echo $prs | jq -r '.[].body')
           cat > pr_body.md <<EOF
-          jq -r '.[].body'
-          update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}
+          $current_pr_body
+          update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}'
           EOF
 
             gh pr edit --body-file pr_body.md
