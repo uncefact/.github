@@ -119,6 +119,6 @@ jobs:
           title: ${{ env.pr_title}}
           body: |
             ${{ env.pr_body}}
-            ${{ github.event.client_payload.snapshot.description }}
+            update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}
           draft: false
           token: ${{ steps.get_workflow_token.outputs.token }}
