@@ -94,13 +94,16 @@ jobs:
         baseurl=$(echo "${{ env.prefix }}" | sed -r 's/[-]+/\//g')
         if [[ "${{ env.version}}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
           major_version=$(echo "${{ env.version }}" | sed 's/^v\([0-9]*\)\..*/\1/')
+          version_postfix=$(echo "${{ env.version }}" | cut -dv -f2)
           if [[ "$major_version" != "${{ inputs.major-version}}" ]]; then
             echo -e "Error: major version mismatch, update input major versio" && exit 1 
           fi
           echo "artefacts_path=/vocabulary/$baseurl" >> "$GITHUB_OUTPUT"
+          echo "version_postfix=$version_postfix" >> "$GITHUB_OUTPUT"
         else
           major_version="${{ env.version}}"
           echo "artefacts_path=/vocabulary/$baseurl/$major_version" >> "$GITHUB_OUTPUT"
+          echo "version_postfix=$version_postfix" >> "$GITHUB_OUTPUT"
         fi
         echo "major_version=$major_version" >> "$GITHUB_OUTPUT"
         echo "baseurl=/vocabulary/$baseurl/$major_version" >> "$GITHUB_OUTPUT"
@@ -112,10 +115,10 @@ jobs:
         context_version=$(jq -r '."@context"."${{ env.prefix }}"' spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld | awk -F/ '{print $(NF-1)}')
         if [[ "$vocab_version" == "${{ steps.set-env.outputs.major_version }}" && "$context_version" == "${{ steps.set-env.outputs.major_version }}" ]]; then
           cp spec-untp/data-models/${{ env.prefix }}/vocabulary.jsonld vocabulary-outputs/${{ env.prefix }}.jsonld
-          cp spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld vocabulary-outputs/${{ env.prefix }}-context-${{ env.version}}.jsonld
+          cp spec-untp/data-models/${{ env.prefix }}/artefacts/context.jsonld vocabulary-outputs/${{ env.prefix }}-context-${{ steps.set-env.outputs.version_postfix }}.jsonld
           cd spec-untp/data-models/${{ env.prefix }}/artefacts/
           shopt -s nullglob
-          for f in *.json; do cp "$f" "../../../../vocabulary-outputs/_artefacts/${f%.json}-${{ env.version }}.json"; done
+          for f in *.json; do cp "$f" "../../../../vocabulary-outputs/_artefacts/${f%.json}-${{ steps.set-env.outputs.version_postfix }}.json"; done
         else
           if [[ "working" == "${{ env.version}}" ]]; then
             echo "Skipping data model due to version mismatch - only working versions are to be published"
@@ -168,9 +171,9 @@ jobs:
         jq '(.majors[] | select (.major == ${{ inputs.major-version }}).log) |= map(select(.version != "${{env.version}}"))' versions.json > versions_tmp.json
         
         jq --arg version_date "$(date +'%Y-%m-%d')" \
-          --argjson schemas $(find ./_artefacts -maxdepth 1 -name "*schema-${{env.version}}.json" -printf '%f\n' | jq -R -c -s 'split("\n")[:-1]') \
-          --argjson instances $(find ./_artefacts -maxdepth 1 -name "*-instance-${{env.version}}.json" -printf '%f\n' | jq -R -c -s 'split("\n")[:-1]') \
-          '(.majors[] | select (.major == 0).log) |= [{"version": "${{env.version}}", "date": $version_date, "notes": "${{env.version}}", "context": "${{env.version}}/context/", "schemas": $schemas, "instances": $instances}] + .' versions_tmp.json > _data/versions.json
+          --argjson schemas $(find ./_artefacts -maxdepth 1 -name "*schema-${{steps.set-env.outputs.version_postfix}}.json" -printf '%f\n' | jq -R -c -s 'split("\n")[:-1]') \
+          --argjson instances $(find ./_artefacts -maxdepth 1 -name "*-instance-${{steps.set-env.outputs.version_postfix}}.json" -printf '%f\n' | jq -R -c -s 'split("\n")[:-1]') \
+          '(.majors[] | select (.major == 0).log) |= [{"version": "${{env.version}}", "date": $version_date, "notes": "${{env.version}}", "context": "${{steps.set-env.outputs.version_postfix}}/context/", "schemas": $schemas, "instances": $instances}] + .' versions_tmp.json > _data/versions.json
         rm versions.json
         rm versions_tmp.json
         rm ${{ env.utility_jar }}
@@ -184,7 +187,7 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-        yq -i '.versions.${{ env.prefix }}="${{ env.version }}"' _config_preview.yml 
+        yq -i '.versions.${{ env.prefix }}="${{ steps.set-env.outputs.version_postfix }}"' _config_preview.yml 
         git add .          
         git commit -m "${{ inputs.comment }}" || echo -e "nothing to commit" 
         git push origin ${{ env.prefix }}-pages-working
