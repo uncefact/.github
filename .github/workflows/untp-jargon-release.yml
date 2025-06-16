@@ -121,7 +121,7 @@ jobs:
           current_pr_body=$(echo $prs | jq -r '.[].body')
           cat > pr_body.md <<EOF
           $current_pr_body
-          update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}'
+          update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}
           EOF
 
             gh pr edit --body-file pr_body.md
