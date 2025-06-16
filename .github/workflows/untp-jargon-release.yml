@@ -120,7 +120,7 @@ jobs:
           else
             gh pr edit --body "$(cat <<EOF
             echo $prs | jq -r '.[].body'
-            echo "update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}"
+            echo 'update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}'
             EOF
             )"
           fi
