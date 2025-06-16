@@ -25,10 +25,20 @@ jobs:
         with:
           application_id: ${{ secrets.APP_ID }}
           application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - uses: actions/checkout@v4
         with:
           ref: data-models-staging
           token: ${{ steps.get_workflow_token.outputs.token }}
+      
+      - name: Check if release branch already exists
+        run: |
+          if gh api repos/{owner}/{repo}/branches/feature/jargon-sync-${{ env.version }} >/dev/null 2>&1; then
+              echo "Branch exists"
+          else
+              echo "Branch does not exist"
+          fi
+      
       - run: 'echo "Domain name: ${{ env.domain_name }}"'
       - run: 'echo "client_payload: ${{ github.event.client_payload }}"'
 
