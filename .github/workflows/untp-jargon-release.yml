@@ -136,6 +136,7 @@ jobs:
           author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           signoff: false
           branch: feature/jargon-sync-${{ env.version }}
+          base: data-models-staging
           delete-branch: true
           title: ${{ env.pr_title}}
           body: |
