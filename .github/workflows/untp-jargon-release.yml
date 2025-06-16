@@ -114,7 +114,7 @@ jobs:
               --json title,body)
           #TODO: add a check that there is a single match or none
           pr_title=$(echo $prs | jq -r '.[].title')
-          if [[ "$pr_title" === "" ]]; then
+          if [[ "$pr_title" == "" ]]; then
             pr_title='feat: update data models with Jargon release ${{ env.version }}'
             gh pr create --title "$pr_title" --base data-models-staging --body "update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}"
           else
