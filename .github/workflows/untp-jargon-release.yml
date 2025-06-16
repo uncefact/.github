@@ -53,7 +53,7 @@ jobs:
       - name: Upload client payload
         uses: actions/upload-artifact@v4
         with:
-          name: client-payload-${{ env.prefix }}
+          name: client-payload-${{ env.version }}
           path: data-models/client_payload.json
           
       - name: Cleanup client payload
@@ -93,7 +93,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
         run: |
           prs=$(gh pr list \
-              --head 'feature/jargon-release-${{ env.version }}' \
+              --head 'feature/jargon-sync-${{ env.version }}' \
               --base 'data-models-staging' \
               --json title,body)
           #TODO: add a check that there is a single match or none
@@ -114,7 +114,7 @@ jobs:
           committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           signoff: false
-          branch: feature/jargon-release-${{ env.version }}
+          branch: feature/jargon-sync-${{ env.version }}
           delete-branch: true
           title: ${{ env.pr_title}}
           body: |
