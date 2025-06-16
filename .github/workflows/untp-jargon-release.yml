@@ -132,7 +132,7 @@ jobs:
           signoff: false
           branch: feature/jargon-sync-${{ env.version }}
           base: data-models-staging
-          delete-branch: true
+          delete-branch: false
           title: ${{ env.pr_title}}
           body: |
             ${{ env.pr_body}}
