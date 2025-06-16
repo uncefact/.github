@@ -114,17 +114,20 @@ jobs:
           git add .          
           git commit -m "feat: update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}" || echo -e "nothing to commit"
           
+          git push origin feature/jargon-sync-${{ env.version }}
           prs=$(gh pr list \
               --head 'feature/jargon-sync-${{ env.version }}' \
               --base 'data-models-staging' \
               --json title,body)
           #TODO: add a check that there is a single match or none
           pr_title=$(echo $prs | jq -r '.[].title')
-          default_pr_title='feat: update data models with Jargon release ${{ env.version }}'
-          pr_title=${pr_title:-$default_pr_title}          
-
-          gh pr create --title "$pr_title" --base data-models-staging --body "$(cat <<EOF
-          echo $prs | jq -r '.[].body'
-          update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}
-          EOF
-          )"
+          if [[ "$pr_title" == "" ]]; then
+            pr_title='feat: update data models with Jargon release ${{ env.version }}'
+            gh pr create --title "$pr_title" --base data-models-staging --body "update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}"
+          else
+            gh pr edit --body "$(cat <<EOF
+            echo $prs | jq -r '.[].body'
+            update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}
+            EOF
+            )"
+          fi
