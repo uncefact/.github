@@ -36,7 +36,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
         run: |
-          gh api repos/{owner}/{repo}/branches/feature/jargon-sync-${{ env.version }} >/dev/null 2>&1 && (git fetch origin && git checkout feature/jargon-sync-${{ env.version }}) || git checkout -b feature/jargon-sync-${{ env.version }} 
+          gh api repos/{owner}/{repo}/branches/feature/jargon-sync-${{ env.version }} >/dev/null 2>&1 && (git fetch origin feature/jargon-sync-${{ env.version }} && git checkout feature/jargon-sync-${{ env.version }}) || git checkout -b feature/jargon-sync-${{ env.version }} 
 
       - run: 'echo "Domain name: ${{ env.domain_name }}"'
       - run: 'echo "client_payload: ${{ github.event.client_payload }}"'
@@ -114,15 +114,14 @@ jobs:
               --json title,body)
           #TODO: add a check that there is a single match or none
           pr_title=$(echo $prs | jq -r '.[].title')
-          if [[ "$pr_title" == "" ]]; then
+          if [[ "$pr_title" === "" ]]; then
             pr_title='feat: update data models with Jargon release ${{ env.version }}'
             gh pr create --title "$pr_title" --base data-models-staging --body "update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}"
           else
-
-            cat > pr_body.md <<EOF
-            echo $prs | jq -r '.[].body'
-            echo 'update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}'
-            EOF
+          cat > pr_body.md <<EOF
+          echo $prs | jq -r '.[].body'
+          echo 'update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}'
+          EOF
 
             gh pr edit --body-file pr_body.md
           fi
