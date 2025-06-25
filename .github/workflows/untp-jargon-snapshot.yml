@@ -26,8 +26,16 @@ jobs:
           application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
       - uses: actions/checkout@v4
         with:
-          ref: data-models-staging
+          ref: main
           token: ${{ steps.get_workflow_token.outputs.token }}
+      
+      - name: Check if release branch already exists
+        id: checkout_release_branch
+        env:
+          GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
+        run: |
+          gh api repos/{owner}/{repo}/branches/feature/jargon-sync-${{ env.prefix }} >/dev/null 2>&1 && (git fetch origin feature/jargon-sync-${{ env.prefix }} && git checkout feature/jargon-sync-${{ env.prefix }}) || git checkout -b feature/jargon-sync-${{ env.prefix }} 
+      
       - run: 'echo "Domain name: ${{ env.domain_name }}"'
       - run: 'echo "client_payload: ${{ github.event.client_payload }}"'
 
@@ -86,38 +94,33 @@ jobs:
             wget -O artefacts/${filename}.json $(echo "$schema_url" | sed 's/^"\|"$//g')
           done
 
-      - name: Prepare PR title and body
+      - name: Create/update pull request
         id: check
         env:
           GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
         run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+
+          git add .          
+          git commit -m 'chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}' || echo -e "nothing to commit"
+          
+          git push origin feature/jargon-sync-${{ env.prefix }} || echo -e "Warning: feature/jargon-sync-${{ env.prefix }} failed"
           prs=$(gh pr list \
               --head 'feature/jargon-sync-${{ env.prefix }}' \
-              --base 'data-models-staging' \
+              --base 'main' \
               --json title,body)
           #TODO: add a check that there is a single match or none
           pr_title=$(echo $prs | jq -r '.[].title')
-          default_pr_title='chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon'
-          pr_title=${pr_title:-$default_pr_title}          
-          echo "pr_title=$pr_title" >> "$GITHUB_ENV"
+          if [[ "$pr_title" == "" ]]; then
+            pr_title='chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon'
+            gh pr create --title "$pr_title" --base main --body "update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}"
+          else
+          current_pr_body=$(echo $prs | jq -r '.[].body')
+          cat > pr_body.md <<EOF
+          $current_pr_body
+          ${{ github.event.client_payload.snapshot.description }}
+          EOF
 
-          echo "pr_body<<EOF" >> $GITHUB_ENV
-          echo $prs | jq -r '.[].body' >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: Create Pull Request
-        id: cpr
-        uses: peter-evans/create-pull-request@v7
-        with:
-          commit-message: 'chore: sync ${{ github.event.client_payload.domain.name }} data model with Jargon snapshot ${{ github.event.client_payload.snapshot.index }}'
-          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
-          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
-          signoff: false
-          branch: feature/jargon-sync-${{ env.prefix }}
-          delete-branch: true
-          title: ${{ env.pr_title}}
-          body: |
-            ${{ env.pr_body}}
-            ${{ github.event.client_payload.snapshot.description }}
-          draft: false
-          token: ${{ steps.get_workflow_token.outputs.token }}
+            gh pr edit --body-file pr_body.md
+          fi
