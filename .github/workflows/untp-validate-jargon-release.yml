@@ -1,0 +1,50 @@
+name: Validate Jargon Release Artefacts
+#todo: add actual validation
+on:
+  workflow_call:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Get Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v4
+        with:
+          application_id: ${{ secrets.APP_ID }}
+          application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.get_workflow_token.outputs.token }}
+      
+      - name: Validate release artefacts
+        working-directory: "data-models/"
+        run: |
+          for file in **/artefacts/context.jsonld; do
+            if [[ -f "$file" ]]; then
+                echo "Processing: $file"
+            fi
+          done
+          for file in **/vocabulary.jsonld; do
+            if [[ -f "$file" ]]; then
+                echo "Processing: $file"
+            fi
+          done
+          for file in **/artefacts/*-schema.*; do
+            if [[ -f "$file" ]]; then
+                echo "Processing: $file"
+            fi
+          done
+          for file in **/artefacts/*-instance.*; do
+            if [[ -f "$file" ]]; then
+                echo "Processing: $file"
+            fi
+          done
+
