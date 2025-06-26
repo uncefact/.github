@@ -28,7 +28,7 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          ref: data-models-staging
+          ref: main
           token: ${{ steps.get_workflow_token.outputs.token }}
       
       - name: Check if release branch already exists
@@ -36,7 +36,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.get_workflow_token.outputs.token }}
         run: |
-          gh api repos/{owner}/{repo}/branches/feature/jargon-sync-${{ env.version }} >/dev/null 2>&1 && (git fetch origin feature/jargon-sync-${{ env.version }} && git checkout feature/jargon-sync-${{ env.version }}) || git checkout -b feature/jargon-sync-${{ env.version }} 
+          gh api repos/{owner}/{repo}/branches/feature/jargon-release-${{ env.version }} >/dev/null 2>&1 && (git fetch origin feature/jargon-release-${{ env.version }} && git checkout feature/jargon-release-${{ env.version }}) || git checkout -b feature/jargon-release-${{ env.version }} 
 
       - run: 'echo "Domain name: ${{ env.domain_name }}"'
       - run: 'echo "client_payload: ${{ github.event.client_payload }}"'
@@ -107,16 +107,16 @@ jobs:
           git add .          
           git commit -m "feat: update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}" || echo -e "nothing to commit"
           
-          git push origin feature/jargon-sync-${{ env.version }} || echo -e "Warning: feature/jargon-sync-${{ env.version }} failed"
+          git push origin feature/jargon-release-${{ env.version }} || echo -e "Warning: feature/jargon-release-${{ env.version }} failed"
           prs=$(gh pr list \
-              --head 'feature/jargon-sync-${{ env.version }}' \
-              --base 'data-models-staging' \
+              --head 'feature/jargon-release-${{ env.version }}' \
+              --base 'main' \
               --json title,body)
           #TODO: add a check that there is a single match or none
           pr_title=$(echo $prs | jq -r '.[].title')
           if [[ "$pr_title" == "" ]]; then
             pr_title='feat: update data models with Jargon release ${{ env.version }}'
-            gh pr create --title "$pr_title" --base data-models-staging --body "update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}"
+            gh pr create --title "$pr_title" --base main --body "update ${{ github.event.client_payload.domain.name }} data model with Jargon release ${{ env.version }}"
           else
           current_pr_body=$(echo $prs | jq -r '.[].body')
           cat > pr_body.md <<EOF
